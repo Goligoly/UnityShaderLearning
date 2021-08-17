@@ -1,0 +1,10 @@
+Assets/JMO Assets/
+Library/
+ProjectSettings/
+.vsconfig
+Assembly-CSharp.csproj
+UnityShaderLearning.sln
+Assets/JMO Assets.meta
+*.meta
+Logs/
+Packages/

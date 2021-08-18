@@ -66,7 +66,7 @@
 				float currentLayerDepth = 0;
 				float2 currentTex = tex;
 				float currentDepthValue = tex2D(_HeightMap, currentTex).r;
-				for(float i = 0; i < 10; i++)
+				for(float i = 0; i < stepSize; i++)
 				{
 					if(currentDepthValue <= currentLayerDepth) break;
 					currentTex -= deltaTexcoods;
@@ -88,7 +88,6 @@
 				float3 tangentView = normalize(i.tangentView);
 
 				float2 texCoord = parallaxMapping(i.uv, tangentView);
-				// return float4(texCoord, 0, 1);
 				if (texCoord.x > 1 || texCoord.y > 1 || texCoord.x < 0 || texCoord.y < 0) clip(-1);
 
 				float3 tangentNormal = UnpackNormal(tex2D(_NormalMap, texCoord));

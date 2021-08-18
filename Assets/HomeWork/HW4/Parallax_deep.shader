@@ -58,7 +58,7 @@
 				// return tex - p;
 
 				// Steep Parallax Mapping
-				float stepSize = 10;
+				float stepSize = 20;
 				float3 p = view * _HeightScale;
 				float deltaDepth = 1 / stepSize;
 				float2 deltaTexcoods = p.xy / stepSize;

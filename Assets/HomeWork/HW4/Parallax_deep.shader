@@ -50,10 +50,15 @@
 				return o;
 			}
 
-			float2 parallaxMapping(fixed2 tex, fixed3 view)
+			float getDepth(float2 tex)
+			{
+				return 1 - tex2D(_HeightMap, tex).r;
+			}
+
+			float2 parallaxMapping(float2 tex, float3 view)
 			{
 				// Parallax Mapping Base
-				// fixed height = tex2D(_HeightMap, tex).r;
+				// fixed height = getDepth(tex);
 				// fixed2 p = view.xy * (height * _HeightScale) / view.z;
 				// return tex - p;
 
@@ -65,19 +70,19 @@
 
 				float currentLayerDepth = 0;
 				float2 currentTex = tex;
-				float currentDepthValue = tex2D(_HeightMap, currentTex).r;
+				float currentDepthValue = getDepth(currentTex);
 				for(float i = 0; i < stepSize; i++)
 				{
 					if(currentDepthValue <= currentLayerDepth) break;
 					currentTex -= deltaTexcoods;
-					currentDepthValue = tex2D(_HeightMap, currentTex).r;
+					currentDepthValue = getDepth(currentTex);
 					currentLayerDepth += deltaDepth;
 				}
 
 				// Parallax Occlusion Mapping
 				float2 preTex = currentTex + deltaTexcoods;
 				float curDepth = currentLayerDepth - currentDepthValue;
-				float preDepth = tex2D(_HeightMap, preTex).r - currentLayerDepth + deltaDepth;
+				float preDepth = getDepth(preTex) - currentLayerDepth + deltaDepth;
 				float weight = curDepth / (curDepth + preDepth);
 				return lerp(currentTex, preTex, weight);
 			}

@@ -55,6 +55,33 @@
 				return 1 - tex2D(_HeightMap, tex).r;
 			}
 
+			float2 biSearch(float2 low, float lowDepth, float2 high, float highDepth)
+			{
+				float2 mid, l, h;
+				float midValue, midDepth, ld, hd;
+				l = low;
+				h = high;
+				ld = lowDepth;
+				hd = highDepth;
+				for(float i = 0; i < 5; i++)
+				{
+					mid = (l + h)/2;
+					midValue = getDepth(mid);
+					midDepth = (ld + hd)/2;
+					if(midValue < midDepth)
+					{
+						l = mid;
+						ld = midDepth;
+					}
+					else
+					{
+						h = mid;
+						hd = midDepth;
+					}
+				}
+				return mid;
+			}
+
 			float2 parallaxMapping(float2 tex, float3 view)
 			{
 				// Parallax Mapping Base
@@ -63,7 +90,7 @@
 				// return tex - p;
 
 				// Steep Parallax Mapping
-				float stepSize = 20;
+				float stepSize = 10;
 				float3 p = view * _HeightScale;
 				float deltaDepth = 1 / stepSize;
 				float2 deltaTexcoods = p.xy / stepSize;
@@ -79,12 +106,14 @@
 					currentLayerDepth += deltaDepth;
 				}
 
+				return biSearch(currentTex, currentLayerDepth, currentTex + deltaTexcoods, currentLayerDepth - deltaDepth);
+
 				// Parallax Occlusion Mapping
-				float2 preTex = currentTex + deltaTexcoods;
-				float curDepth = currentLayerDepth - currentDepthValue;
-				float preDepth = getDepth(preTex) - currentLayerDepth + deltaDepth;
-				float weight = curDepth / (curDepth + preDepth);
-				return lerp(currentTex, preTex, weight);
+				// float2 preTex = currentTex + deltaTexcoods;
+				// float curDepth = currentLayerDepth - currentDepthValue;
+				// float preDepth = getDepth(preTex) - currentLayerDepth + deltaDepth;
+				// float weight = curDepth / (curDepth + preDepth);
+				// return lerp(currentTex, preTex, weight);
 			}
 		
 			float4 frag(v2f i) :SV_TARGET

@@ -95,7 +95,7 @@
                 fixed3 reflect = - i.worldView + 2 * dot(normal, i.worldView) * normal;
                 fixed3 reflection = texCUBE(_Background, normalize(reflect));
 
-                //Blinn-Phong in tangent space
+                //Blinn-Phong
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 
                 fixed3 albedo = _UseTexture == 1 ? _DiffuseColor.rgb * tex2D(_MainTex, i.uv) : _DiffuseColor.rgb;

@@ -115,6 +115,24 @@
 				// float weight = curDepth / (curDepth + preDepth);
 				// return lerp(currentTex, preTex, weight);
 			}
+
+			// float getSelfShadow(float2 tex, float3 light)
+			// {
+			// 	float stepSize = 5;
+			// 	float curDepth = getDepth(tex);
+			// 	float curValue = curDepth;
+			// 	float2 curTex = tex;
+			// 	float deltaDepth = curDepth / 10;
+			// 	float2 deltaTex = light.xy * deltaDepth / light.z;
+			// 	for(float i = 0; i < stepSize; i++)
+			// 	{
+			// 		tex += deltaTex;
+			// 		curValue -= deltaDepth;
+			// 		curDepth = getDepth(tex);
+			// 		if(curDepth < curValue) return 0.8;
+			// 	}
+			// 	return 1;
+			// }
 		
 			float4 frag(v2f i) :SV_TARGET
 			{

@@ -9,9 +9,12 @@
     {
         Pass
         {
+            Cull Off
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+
+            #include "UnityCG.cginc"
 
             struct appdata
             {
@@ -30,8 +33,9 @@
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.dir = normalize(v.vertex.xyz);
+                float3 center = UnityObjectToViewPos(float3(0,0,0));
+                o.vertex = UnityViewToClipPos(UnityObjectToViewPos(v.vertex) - center);
+                o.dir = normalize(v.vertex);
 
                 float radian = _Degree * 2 * 3.14 / 360;
                 o.dir.xz = cos(radian) * o.dir.xz + sin(radian) * float2(o.dir.z, - o.dir.x);

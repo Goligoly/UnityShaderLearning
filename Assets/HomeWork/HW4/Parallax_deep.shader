@@ -5,6 +5,8 @@
 		[NoScaleOffset]_NormalMap("Normal", 2d) = "white" {}
 		[NoScaleOffset]_HeightMap("Height", 2d) = "white" {}
 		_HeightScale("Height Scale", Range(0, 0.3)) = 0.1
+		_FogHeight("Fog Height", Range(0, 1)) = 0.3
+		_FogColor("Fog Color", Color) = (1,1,1,1)
 	}
 	SubShader {
 		pass {
@@ -21,6 +23,8 @@
 			sampler2D _NormalMap;
 			sampler2D _HeightMap;
 			float _HeightScale;
+			float _FogHeight;
+			float4 _FogColor;
 		
 			struct v2f {
 				float4 pos : POSITION;
@@ -142,13 +146,15 @@
 				float2 texCoord = parallaxMapping(i.uv, tangentView);
 				if (texCoord.x > 1 || texCoord.y > 1 || texCoord.x < 0 || texCoord.y < 0) clip(-1);
 
+				float fog = saturate((getDepth(texCoord) - 1 + _FogHeight) / _FogHeight);
+
 				float3 tangentNormal = UnpackNormal(tex2D(_NormalMap, texCoord));
 
 				float3 albedo = tex2D(_MainTex, texCoord);
 
 				float3 diffuse = _LightColor0 * albedo * saturate(dot(tangentLight, tangentNormal));
 
-				return fixed4(diffuse, 1);
+				return float4(lerp(diffuse, _FogColor, fog), 1);
 			}
 			ENDCG
 		}

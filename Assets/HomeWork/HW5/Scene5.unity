@@ -705,6 +705,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   directionalLight: {fileID: 1200340200}
+  shadowMapCasterShader: {fileID: 4800000, guid: add6b1f6abbf69a4db906402c42a26a7,
+    type: 3}
+  shadowResolution: 1
+  customShadowStrengthen: 0.5
 --- !u!1 &1411723845
 GameObject:
   m_ObjectHideFlags: 0

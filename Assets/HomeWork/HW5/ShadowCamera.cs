@@ -5,9 +5,30 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class ShadowCamera : MonoBehaviour
 {
+    public enum ShadowMapResolution
+    {
+        VeryLow = 128,
+        Low = 256,
+        Medium = 512,
+        High = 1024,
+        VertHigh = 2048
+    }
+
     public Light directionalLight;
 
+    public Shader shadowMapCasterShader;
+
+    public ShadowResolution shadowResolution = ShadowResolution.Medium;
+
+    [Range(0, 1)] public float customShadowStrengthen = 0.5f;
+
     private Camera shadowMapCam;
+
+    private static readonly int _CustomShadowMap = Shader.PropertyToID("_CustomShadowMap");
+
+    private static readonly int _CustomLightSpaceMatrix = Shader.PropertyToID("_CustomLightSpaceMatrix");
+
+    private static readonly int _CustomShadowStrengthen = Shader.PropertyToID("_CustomShadowStrengthen");
 
     // Start is called before the first frame update
     void Start()
@@ -20,6 +41,27 @@ public class ShadowCamera : MonoBehaviour
         shadowMapCam.nearClipPlane = 0.3f;
         shadowMapCam.farClipPlane = 20;
         shadowMapCam.enabled = false;
+
+        shadowMapCam.SetReplacementShader(shadowMapCasterShader, "LightMode");
+
+        var shadowMapTexture = shadowMapCam.targetTexture;
+        var textureSize = (int)shadowResolution;
+        if (shadowMapTexture == null || shadowMapTexture.width != textureSize)
+        {
+            if (shadowMapTexture != null) RenderTexture.ReleaseTemporary(shadowMapTexture);
+            shadowMapTexture = RenderTexture.GetTemporary(textureSize, textureSize, 0, RenderTextureFormat.RG16);
+            shadowMapTexture.name = "_CustomShadowMap";
+            shadowMapCam.targetTexture = shadowMapTexture;
+            Shader.SetGlobalTexture(_CustomShadowMap, shadowMapTexture);
+        }
+
+        shadowMapCam.Render();
+
+        var lightSpaceMatrix = GL.GetGPUProjectionMatrix(shadowMapCam.projectionMatrix, false);
+        lightSpaceMatrix = lightSpaceMatrix * shadowMapCam.worldToCameraMatrix;
+
+        Shader.SetGlobalMatrix(_CustomLightSpaceMatrix, lightSpaceMatrix);
+        Shader.SetGlobalFloat(_CustomShadowStrengthen, customShadowStrengthen);
     }
 
     private void OnDrawGizmos()

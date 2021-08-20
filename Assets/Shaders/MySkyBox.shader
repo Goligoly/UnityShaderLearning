@@ -33,8 +33,7 @@
             v2f vert (appdata v)
             {
                 v2f o;
-                float3 center = UnityObjectToViewPos(float3(0,0,0));
-                o.vertex = UnityViewToClipPos(UnityObjectToViewPos(v.vertex) - center);
+                o.vertex = UnityViewToClipPos(mul((float3x3)UNITY_MATRIX_V, v.vertex));
                 o.dir = normalize(v.vertex);
 
                 float radian = _Degree * 2 * 3.14 / 360;

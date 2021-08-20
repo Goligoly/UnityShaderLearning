@@ -9,3 +9,6 @@ Assets/JMO Assets.meta
 Logs/
 Packages/
 Temp/
+*.cache
+.vs/
+*.csproj

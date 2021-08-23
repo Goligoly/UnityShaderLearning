@@ -27,7 +27,7 @@
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.depth = o.vertex.z * 0.5 + 0.5;
+                o.depth = -0.5 * o.vertex.z / o.vertex.w + 0.5;
                 return o;
             }
 

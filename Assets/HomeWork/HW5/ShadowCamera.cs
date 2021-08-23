@@ -20,15 +20,11 @@ public class ShadowCamera : MonoBehaviour
 
     public ShadowMapResolution shadowResolution = ShadowMapResolution.Medium;
 
-    [Range(0, 1)] public float customShadowStrengthen = 0.5f;
-
     private Camera shadowMapCam;
 
     private static readonly int _CustomShadowMap = Shader.PropertyToID("_CustomShadowMap");
 
     private static readonly int _CustomLightSpaceMatrix = Shader.PropertyToID("_CustomLightSpaceMatrix");
-
-    private static readonly int _CustomShadowStrengthen = Shader.PropertyToID("_CustomShadowStrengthen");
 
     // Start is called before the first frame update
     void Start()
@@ -108,6 +104,5 @@ public class ShadowCamera : MonoBehaviour
         lightSpaceMatrix = lightSpaceMatrix * shadowMapCam.worldToCameraMatrix;
 
         Shader.SetGlobalMatrix(_CustomLightSpaceMatrix, lightSpaceMatrix);
-        Shader.SetGlobalFloat(_CustomShadowStrengthen, customShadowStrengthen);
     }
 }

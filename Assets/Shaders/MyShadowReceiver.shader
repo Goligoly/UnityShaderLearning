@@ -3,6 +3,8 @@
     Properties
     {
         _ShadowBias ("Bias", Range(0, 0.1)) = 0.05
+        _ShadowStrengthen ("Shadow Strengthen", Range(0,1)) = 0.3
+        [IntRange] _PCF_Range ("PCF range", Range(0, 5)) = 1
     }
     SubShader
     {
@@ -18,9 +20,12 @@
             #include "Lighting.cginc"
 
             float _ShadowBias;
+            float _PCF_Range;
 
             sampler2D _CustomShadowMap;
+            float4 _CustomShadowMap_TexelSize;
             float4x4 _CustomLightSpaceMatrix;
+            float _ShadowStrengthen;
 
             struct appdata
             {
@@ -50,7 +55,15 @@
             {
                 float2 uv = 0.5 * lightClipPos.xy/lightClipPos.w + 0.5;
                 float depth = -0.5 * lightClipPos.z/lightClipPos.w + 0.5;
-                return 1 - ceil(depth - tex2D(_CustomShadowMap, uv).r - _ShadowBias);
+                float shadowValue;
+                for(float x = -_PCF_Range; x <= _PCF_Range; x++)
+                {
+                    for(float y = -_PCF_Range; y <= _PCF_Range; y++)
+                    {
+                        shadowValue += tex2D(_CustomShadowMap, uv + float2(x, y) * _CustomShadowMap_TexelSize).r + _ShadowBias < depth ? _ShadowStrengthen : 1;
+                    }
+                }
+                return shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));
             }
 
             float4 frag (v2f i) : SV_Target
@@ -58,11 +71,11 @@
                 float3 worldLight = UnityWorldSpaceLightDir(i.worldPos);
                 float3 worldNormal = i.normal;
 
-                float isShadow = getDepth(i.lightClipPos);
+                float shadowValue = getDepth(i.lightClipPos);
 
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 
-                float3 abedo = isShadow * _LightColor0.rgb;
+                float3 abedo = shadowValue * _LightColor0.rgb;
                 float3 diffuse = abedo * saturate(dot(worldLight, worldNormal));
                 return float4(ambient + diffuse, 1);
             }

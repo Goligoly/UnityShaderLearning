@@ -27,13 +27,13 @@
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.depth = COMPUTE_DEPTH_01;
+                o.depth = o.vertex.z * 0.5 + 0.5;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                return fixed4(EncodeFloatRG(i.depth), 0, 1);
+                return fixed4(i.depth.xxx, 1);
             }
             ENDCG
         }

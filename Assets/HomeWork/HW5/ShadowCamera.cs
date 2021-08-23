@@ -18,7 +18,7 @@ public class ShadowCamera : MonoBehaviour
 
     public Shader shadowMapCasterShader;
 
-    public ShadowResolution shadowResolution = ShadowResolution.Medium;
+    public ShadowMapResolution shadowResolution = ShadowMapResolution.Medium;
 
     [Range(0, 1)] public float customShadowStrengthen = 0.5f;
 
@@ -33,7 +33,7 @@ public class ShadowCamera : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        shadowMapCam = directionalLight.gameObject.AddComponent<Camera>();
+        shadowMapCam = directionalLight.gameObject.AddComponent<Camera>() ?? directionalLight.gameObject.GetComponent<Camera>();
         shadowMapCam.backgroundColor = Color.white;
         shadowMapCam.clearFlags = CameraClearFlags.SolidColor;
         shadowMapCam.orthographic = true;
@@ -42,14 +42,14 @@ public class ShadowCamera : MonoBehaviour
         shadowMapCam.farClipPlane = 20;
         shadowMapCam.enabled = false;
 
-        shadowMapCam.SetReplacementShader(shadowMapCasterShader, "LightMode");
+        shadowMapCam.SetReplacementShader(shadowMapCasterShader, null);
 
         var shadowMapTexture = shadowMapCam.targetTexture;
         var textureSize = (int)shadowResolution;
         if (shadowMapTexture == null || shadowMapTexture.width != textureSize)
         {
             if (shadowMapTexture != null) RenderTexture.ReleaseTemporary(shadowMapTexture);
-            shadowMapTexture = RenderTexture.GetTemporary(textureSize, textureSize, 0, RenderTextureFormat.RG16);
+            shadowMapTexture = RenderTexture.GetTemporary(textureSize, textureSize, 0, RenderTextureFormat.ARGB32);
             shadowMapTexture.name = "_CustomShadowMap";
             shadowMapCam.targetTexture = shadowMapTexture;
             Shader.SetGlobalTexture(_CustomShadowMap, shadowMapTexture);

@@ -20,12 +20,12 @@
             #include "Lighting.cginc"
 
             float _ShadowBias;
+            float _ShadowStrengthen;
             float _PCF_Range;
 
             sampler2D _CustomShadowMap;
             float4 _CustomShadowMap_TexelSize;
             float4x4 _CustomLightSpaceMatrix;
-            float _ShadowStrengthen;
 
             struct appdata
             {
@@ -56,11 +56,13 @@
                 float2 uv = 0.5 * lightClipPos.xy/lightClipPos.w + 0.5;
                 float depth = -0.5 * lightClipPos.z/lightClipPos.w + 0.5;
                 float shadowValue;
+                float samplerValue;
                 for(float x = -_PCF_Range; x <= _PCF_Range; x++)
                 {
                     for(float y = -_PCF_Range; y <= _PCF_Range; y++)
                     {
-                        shadowValue += tex2D(_CustomShadowMap, uv + float2(x, y) * _CustomShadowMap_TexelSize).r + _ShadowBias < depth ? _ShadowStrengthen : 1;
+                        samplerValue = tex2D(_CustomShadowMap, uv + float2(x, y) * _CustomShadowMap_TexelSize).r;
+                        shadowValue += samplerValue + _ShadowBias < depth ? _ShadowStrengthen : 1;
                     }
                 }
                 return shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));

@@ -54,14 +54,6 @@ public class ShadowCamera : MonoBehaviour
             shadowMapCam.targetTexture = shadowMapTexture;
             Shader.SetGlobalTexture(_CustomShadowMap, shadowMapTexture);
         }
-
-        shadowMapCam.Render();
-
-        var lightSpaceMatrix = GL.GetGPUProjectionMatrix(shadowMapCam.projectionMatrix, false);
-        lightSpaceMatrix = lightSpaceMatrix * shadowMapCam.worldToCameraMatrix;
-
-        Shader.SetGlobalMatrix(_CustomLightSpaceMatrix, lightSpaceMatrix);
-        Shader.SetGlobalFloat(_CustomShadowStrengthen, customShadowStrengthen);
     }
 
     private void OnDrawGizmos()
@@ -110,6 +102,12 @@ public class ShadowCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        shadowMapCam.Render();
+
+        var lightSpaceMatrix = GL.GetGPUProjectionMatrix(shadowMapCam.projectionMatrix, false);
+        lightSpaceMatrix = lightSpaceMatrix * shadowMapCam.worldToCameraMatrix;
+
+        Shader.SetGlobalMatrix(_CustomLightSpaceMatrix, lightSpaceMatrix);
+        Shader.SetGlobalFloat(_CustomShadowStrengthen, customShadowStrengthen);
     }
 }

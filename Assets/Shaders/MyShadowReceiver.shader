@@ -54,7 +54,12 @@
             float getDepth(float4 lightClipPos)
             {
                 float2 uv = 0.5 * lightClipPos.xy/lightClipPos.w + 0.5;
-                float depth = -0.5 * lightClipPos.z/lightClipPos.w + 0.5;
+                float depth = lightClipPos.z/lightClipPos.w;
+                #if defined (SHADER_TARGET_GLSL) 
+                    depth = depth * 0.5 + 0.5;
+                #elif defined (UNITY_REVERSED_Z)
+                    depth = 1 - depth;
+                #endif
                 float shadowValue;
                 float samplerValue;
                 for(float x = -_PCF_Range; x <= _PCF_Range; x++)

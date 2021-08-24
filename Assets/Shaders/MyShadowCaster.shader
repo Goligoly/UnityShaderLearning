@@ -28,7 +28,12 @@
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.depth = -0.5 * o.vertex.z / o.vertex.w + 0.5;
+                o.depth = o.vertex.z / o.vertex.w;
+                #if defined (SHADER_TARGET_GLSL) 
+                    o.depth = o.depth * 0.5 + 0.5;
+                #elif defined (UNITY_REVERSED_Z)
+                    o.depth = 1 - o.depth;
+                #endif
                 return o;
             }
 

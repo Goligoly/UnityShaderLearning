@@ -22,12 +22,26 @@ public class ShadowCamera : MonoBehaviour
 
     private Camera shadowMapCam;
 
+    private struct FrustumCorners
+    {
+        public Vector3[] nearCorners;
+        public Vector3[] farCorners;
+    }
+
+    private FrustumCorners mainCamera_fcs, shadowCamera_fcs;
+
     private static readonly int _CustomShadowMap = Shader.PropertyToID("_CustomShadowMap");
 
     private static readonly int _CustomLightSpaceMatrix = Shader.PropertyToID("_CustomLightSpaceMatrix");
 
     // Start is called before the first frame update
     void Start()
+    {
+        InitFrustumCorners();
+        InitShadowCam();
+    }
+
+    private void InitShadowCam()
     {
         shadowMapCam = directionalLight.gameObject.AddComponent<Camera>() ?? directionalLight.gameObject.GetComponent<Camera>();
         shadowMapCam.backgroundColor = Color.white;
@@ -52,57 +66,127 @@ public class ShadowCamera : MonoBehaviour
         }
     }
 
+    void InitFrustumCorners()
+    {
+        mainCamera_fcs = new FrustumCorners();
+        mainCamera_fcs.nearCorners = new Vector3[4];
+        mainCamera_fcs.farCorners = new Vector3[4];
+        shadowCamera_fcs = new FrustumCorners();
+        shadowCamera_fcs.nearCorners = new Vector3[4];
+        shadowCamera_fcs.farCorners = new Vector3[4];
+    }
+
     private void OnDrawGizmos()
     {
-        if (directionalLight == null || shadowMapCam == null) return;
+        Gizmos.color = Color.magenta;
+        DrawFrustum(mainCamera_fcs.nearCorners, mainCamera_fcs.farCorners);
         Gizmos.color = Color.cyan;
-        float size = shadowMapCam.orthographicSize;
+        DrawFrustum(shadowCamera_fcs.nearCorners, shadowCamera_fcs.farCorners);
+    }
 
-        var l_near = shadowMapCam.nearClipPlane;
-        var l_far = shadowMapCam.farClipPlane;
-        var l_pos = directionalLight.transform.position;
-        var l_up = directionalLight.transform.up;
-        var l_forward = directionalLight.transform.forward;
-        var l_right = directionalLight.transform.right;
-
-        Vector3 tl_n = l_pos + l_forward * l_near - l_right * size + l_up * size;
-        Vector3 bl_n = l_pos + l_forward * l_near - l_right * size - l_up * size;
-
-        Vector3 tr_n = l_pos + l_forward * l_near + l_right * size + l_up * size;
-        Vector3 br_n = l_pos + l_forward * l_near + l_right * size - l_up * size;
-
-        Vector3 tl_f = l_pos + l_forward * l_far - l_right * size + l_up * size;
-        Vector3 bl_f = l_pos + l_forward * l_far - l_right * size - l_up * size;
-
-        Vector3 tr_f = l_pos + l_forward * l_far + l_right * size + l_up * size;
-        Vector3 br_f = l_pos + l_forward * l_far + l_right * size - l_up * size;
+    private void DrawFrustum(Vector3[] nearCorners, Vector3[] farCorners)
+    {
+        if (nearCorners == null || farCorners == null) return;
 
         //nearClipPlane
-        Gizmos.DrawLine(bl_n, tl_n);
-        Gizmos.DrawLine(br_n, tr_n);
-        Gizmos.DrawLine(tl_n, tr_n);
-        Gizmos.DrawLine(bl_n, br_n);
+        Gizmos.DrawLine(nearCorners[0], nearCorners[1]);
+        Gizmos.DrawLine(nearCorners[1], nearCorners[2]);
+        Gizmos.DrawLine(nearCorners[2], nearCorners[3]);
+        Gizmos.DrawLine(nearCorners[3], nearCorners[0]);
 
         //farClipPlane
-        Gizmos.DrawLine(bl_f, tl_f);
-        Gizmos.DrawLine(br_f, tr_f);
-        Gizmos.DrawLine(tl_f, tr_f);
-        Gizmos.DrawLine(bl_f, br_f);
+        Gizmos.DrawLine(farCorners[0], farCorners[1]);
+        Gizmos.DrawLine(farCorners[1], farCorners[2]);
+        Gizmos.DrawLine(farCorners[2], farCorners[3]);
+        Gizmos.DrawLine(farCorners[3], farCorners[0]);
 
-        Gizmos.DrawLine(tl_n, tl_f);
-        Gizmos.DrawLine(bl_n, bl_f);
-        Gizmos.DrawLine(tr_n, tr_f);
-        Gizmos.DrawLine(br_n, br_f);
+        Gizmos.DrawLine(nearCorners[0], farCorners[0]);
+        Gizmos.DrawLine(nearCorners[1], farCorners[1]);
+        Gizmos.DrawLine(nearCorners[2], farCorners[2]);
+        Gizmos.DrawLine(nearCorners[3], farCorners[3]);
     }
 
     // Update is called once per frame
     void Update()
     {
+        CalcMainCameraFrustumCorners();
+        CalcShadowCameraFrustum();
+
         shadowMapCam.Render();
 
         var lightSpaceMatrix = GL.GetGPUProjectionMatrix(shadowMapCam.projectionMatrix, false);
         lightSpaceMatrix = lightSpaceMatrix * shadowMapCam.worldToCameraMatrix;
 
         Shader.SetGlobalMatrix(_CustomLightSpaceMatrix, lightSpaceMatrix);
+    }
+
+    private void CalcMainCameraFrustumCorners()
+    {
+        if (mainCamera_fcs.nearCorners == null) return;
+
+        Camera.main.CalculateFrustumCorners(new Rect(0, 0, 1, 1), Camera.main.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, mainCamera_fcs.nearCorners);
+
+        for (int i = 0; i < 4; i++)
+        {
+            mainCamera_fcs.nearCorners[i] = Camera.main.transform.TransformPoint(mainCamera_fcs.nearCorners[i]);
+        }
+
+        Camera.main.CalculateFrustumCorners(new Rect(0, 0, 1, 1), Camera.main.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, mainCamera_fcs.farCorners);
+
+        for (int i = 0; i < 4; i++)
+        {
+            mainCamera_fcs.farCorners[i] = Camera.main.transform.TransformPoint(mainCamera_fcs.farCorners[i]);
+        }
+    }
+
+    private void CalcShadowCameraFrustum()
+    {
+        if (shadowMapCam == null || mainCamera_fcs.nearCorners == null) return;
+
+        for (int i = 0; i < 4; i++)
+        {
+            shadowCamera_fcs.nearCorners[i] = shadowMapCam.transform.InverseTransformPoint(mainCamera_fcs.nearCorners[i]);
+            shadowCamera_fcs.farCorners[i] = shadowMapCam.transform.InverseTransformPoint(mainCamera_fcs.farCorners[i]);
+        }
+
+        float[] xs = { shadowCamera_fcs.nearCorners[0].x, shadowCamera_fcs.nearCorners[1].x, shadowCamera_fcs.nearCorners[2].x, shadowCamera_fcs.nearCorners[3].x,
+                    shadowCamera_fcs.farCorners[0].x, shadowCamera_fcs.farCorners[1].x, shadowCamera_fcs.farCorners[2].x, shadowCamera_fcs.farCorners[3].x };
+
+        float[] ys = { shadowCamera_fcs.nearCorners[0].y, shadowCamera_fcs.nearCorners[1].y, shadowCamera_fcs.nearCorners[2].y, shadowCamera_fcs.nearCorners[3].y,
+                    shadowCamera_fcs.farCorners[0].y, shadowCamera_fcs.farCorners[1].y, shadowCamera_fcs.farCorners[2].y, shadowCamera_fcs.farCorners[3].y };
+
+        float[] zs = { shadowCamera_fcs.nearCorners[0].z, shadowCamera_fcs.nearCorners[1].z, shadowCamera_fcs.nearCorners[2].z, shadowCamera_fcs.nearCorners[3].z,
+                    shadowCamera_fcs.farCorners[0].z, shadowCamera_fcs.farCorners[1].z, shadowCamera_fcs.farCorners[2].z, shadowCamera_fcs.farCorners[3].z };
+
+        float minX = Mathf.Min(xs);
+        float maxX = Mathf.Max(xs);
+        float minY = Mathf.Min(ys);
+        float maxY = Mathf.Max(ys);
+        float minZ = Mathf.Min(zs);
+        float maxZ = Mathf.Max(zs);
+
+        shadowCamera_fcs.nearCorners[0] = new Vector3(minX, minY, minZ);
+        shadowCamera_fcs.nearCorners[1] = new Vector3(maxX, minY, minZ);
+        shadowCamera_fcs.nearCorners[2] = new Vector3(maxX, maxY, minZ);
+        shadowCamera_fcs.nearCorners[3] = new Vector3(minX, maxY, minZ);
+
+        shadowCamera_fcs.farCorners[0] = new Vector3(minX, minY, maxZ);
+        shadowCamera_fcs.farCorners[1] = new Vector3(maxX, minY, maxZ);
+        shadowCamera_fcs.farCorners[2] = new Vector3(maxX, maxY, maxZ);
+        shadowCamera_fcs.farCorners[3] = new Vector3(minX, maxY, maxZ);
+
+        Vector3 pos = shadowCamera_fcs.nearCorners[0] + 0.5f * (shadowCamera_fcs.nearCorners[2] - shadowCamera_fcs.nearCorners[0]);
+        shadowMapCam.transform.position = shadowMapCam.transform.TransformPoint(pos);
+        shadowMapCam.transform.rotation = directionalLight.transform.rotation;
+        shadowMapCam.nearClipPlane = minZ;
+        shadowMapCam.farClipPlane = maxZ;
+        shadowMapCam.aspect = Vector3.Magnitude(shadowCamera_fcs.nearCorners[1] - shadowCamera_fcs.nearCorners[0]) / Vector3.Magnitude(shadowCamera_fcs.nearCorners[1] - shadowCamera_fcs.nearCorners[2]);
+        shadowMapCam.orthographicSize = Vector3.Magnitude(shadowCamera_fcs.nearCorners[1] - shadowCamera_fcs.nearCorners[2]) * 0.5f;
+
+        for (int i = 0; i < 4; i++)
+        {
+            shadowCamera_fcs.nearCorners[i] = shadowMapCam.transform.TransformPoint(shadowCamera_fcs.nearCorners[i]);
+            shadowCamera_fcs.farCorners[i] = shadowMapCam.transform.TransformPoint(shadowCamera_fcs.farCorners[i]);
+        }
     }
 }

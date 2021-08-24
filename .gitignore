@@ -5,7 +5,6 @@ ProjectSettings/
 Assembly-CSharp.csproj
 UnityShaderLearning.sln
 Assets/JMO Assets.meta
-*.meta
 Logs/
 Packages/
 Temp/

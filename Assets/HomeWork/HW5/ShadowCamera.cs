@@ -201,8 +201,8 @@ public class ShadowCamera : MonoBehaviour
 
         Vector3 pos = shadowCamera_fcs[level].nearCorners[0] + 0.5f * (shadowCamera_fcs[level].nearCorners[2] - shadowCamera_fcs[level].nearCorners[0]);
         shadowMapCam.transform.rotation = directionalLight.transform.rotation;
-        shadowMapCam.nearClipPlane = minZ;
-        shadowMapCam.farClipPlane = maxZ;
+        shadowMapCam.nearClipPlane = 0;
+        shadowMapCam.farClipPlane = maxZ - minZ;
         shadowMapCam.aspect = Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[1] - shadowCamera_fcs[level].nearCorners[0]) / Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[1] - shadowCamera_fcs[level].nearCorners[2]);
         shadowMapCam.orthographicSize = Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[1] - shadowCamera_fcs[level].nearCorners[2]) * 0.5f;
 

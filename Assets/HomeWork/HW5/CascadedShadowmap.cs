@@ -10,7 +10,7 @@ public class CascadedShadowmap : BaseShadowCamera
 
     protected FrustumCorners[] mainCamera_fcs, shadowCamera_fcs;
 
-    protected RenderTexture[] shadowTexture;
+    protected RenderTexture[] depthTexture;
 
     // Start is called before the first frame update
     void Start()
@@ -21,7 +21,7 @@ public class CascadedShadowmap : BaseShadowCamera
         {
             InitFrustumCorners(ref mainCamera_fcs[level]);
             InitFrustumCorners(ref shadowCamera_fcs[level]);
-            InitShaderTexture(ref shadowTexture[level], level);
+            InitShaderTexture(ref depthTexture[level], level);
         }
         Shader.SetGlobalFloat("_CascadedLevels", cascadedLevels);
     }
@@ -38,7 +38,7 @@ public class CascadedShadowmap : BaseShadowCamera
             CalcMainCameraFrustumCorners(near + level * delta, near + (level + 1) * delta, ref mainCamera_fcs[level]);
             CalcShadowCameraFrustum(ref shadowCamera_fcs[level], ref mainCamera_fcs[level]);
             ResetShadowCamera(ref shadowCamera_fcs[level]);
-            ShadowTextureRender(shadowTexture[level], level);
+            ShadowTextureRender(depthTexture[level], level);
         }
     }
 
@@ -48,9 +48,9 @@ public class CascadedShadowmap : BaseShadowCamera
 
         for (level = 0; level < cascadedLevels; level++)
         {
-            if (shadowTexture[level])
+            if (depthTexture[level])
             {
-                DestroyImmediate(shadowTexture[level]);
+                DestroyImmediate(depthTexture[level]);
             }
         }
     }
@@ -72,6 +72,6 @@ public class CascadedShadowmap : BaseShadowCamera
     {
         mainCamera_fcs = new FrustumCorners[cascadedLevels];
         shadowCamera_fcs = new FrustumCorners[cascadedLevels];
-        shadowTexture = new RenderTexture[cascadedLevels];
+        depthTexture = new RenderTexture[cascadedLevels];
     }
 }

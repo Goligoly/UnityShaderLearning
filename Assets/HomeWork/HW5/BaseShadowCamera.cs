@@ -77,7 +77,7 @@ public class BaseShadowCamera : MonoBehaviour
 
     protected void CalcMainCameraFrustumCorners(float near, float far, ref FrustumCorners frustumCorners)
     {
-        if (frustumCorners.Equals(null)) return;
+        if (frustumCorners.nearCorners == null) return;
         Camera.main.CalculateFrustumCorners(new Rect(0, 0, 1, 1), near, Camera.MonoOrStereoscopicEye.Mono, frustumCorners.nearCorners);
 
         for (int i = 0; i < 4; i++)
@@ -95,7 +95,7 @@ public class BaseShadowCamera : MonoBehaviour
 
     protected void CalcShadowCameraFrustum(ref FrustumCorners shadowCam, ref FrustumCorners mainCam)
     {
-        if (shadowMapCam == null) return;
+        if (shadowMapCam == null || shadowCam.nearCorners == null) return;
 
         for (int i = 0; i < 4; i++)
         {
@@ -138,6 +138,8 @@ public class BaseShadowCamera : MonoBehaviour
 
     protected void ResetShadowCamera(ref FrustumCorners shadowCam)
     {
+        if (shadowCam.nearCorners == null) return;
+
         Vector3 pos = shadowCam.nearCorners[0] + 0.5f * (shadowCam.nearCorners[2] - shadowCam.nearCorners[0]);
         shadowMapCam.transform.position = pos;
         shadowMapCam.transform.rotation = directionalLight.transform.rotation;

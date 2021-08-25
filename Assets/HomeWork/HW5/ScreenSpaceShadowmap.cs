@@ -15,6 +15,7 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
         InitFrustumCorners(ref mainCamera_fcs);
         InitFrustumCorners(ref shadowCamera_fcs);
         InitShaderTexture(ref shadowTexture, 0);
+        Shader.SetGlobalFloat("_CascadedLevels", 1);
     }
 
     // Update is called once per frame

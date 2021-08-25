@@ -56,6 +56,7 @@ public class BaseShadowCamera : MonoBehaviour
 
     protected void DrawFrustum(Vector3[] nearCorners, Vector3[] farCorners)
     {
+        if (nearCorners == null || farCorners == null) return;
         //nearClipPlane
         Gizmos.DrawLine(nearCorners[0], nearCorners[1]);
         Gizmos.DrawLine(nearCorners[1], nearCorners[2]);
@@ -76,6 +77,7 @@ public class BaseShadowCamera : MonoBehaviour
 
     protected void CalcMainCameraFrustumCorners(float near, float far, ref FrustumCorners frustumCorners)
     {
+        if (frustumCorners.Equals(null)) return;
         Camera.main.CalculateFrustumCorners(new Rect(0, 0, 1, 1), near, Camera.MonoOrStereoscopicEye.Mono, frustumCorners.nearCorners);
 
         for (int i = 0; i < 4; i++)

@@ -6,7 +6,7 @@ public class CascadedShadowmap : BaseShadowCamera
 {
     protected int level;
 
-    protected int cascadedLevels = 3;
+    protected int cascadedLevels = 3;//不要超过3
 
     protected FrustumCorners[] mainCamera_fcs, shadowCamera_fcs;
 
@@ -23,6 +23,7 @@ public class CascadedShadowmap : BaseShadowCamera
             InitFrustumCorners(ref shadowCamera_fcs[level]);
             InitShaderTexture(ref shadowTexture[level], level);
         }
+        Shader.SetGlobalFloat("_CascadedLevels", cascadedLevels);
     }
 
     // Update is called once per frame

@@ -23,9 +23,15 @@
             float _ShadowStrengthen;
             float _PCF_Range;
 
-            sampler2D _CustomShadowMap;
-            float4 _CustomShadowMap_TexelSize;
-            float4x4 _CustomLightSpaceMatrix;
+            sampler2D _CustomShadowMap0;
+            float4 _CustomShadowMap0_TexelSize;
+            float4x4 _CustomLightSpaceMatrix0;
+
+            sampler2D _CustomShadowMap1;
+            float4x4 _CustomLightSpaceMatrix1;
+
+            sampler2D _CustomShadowMap2;
+            float4x4 _CustomLightSpaceMatrix2;
 
             struct appdata
             {
@@ -38,7 +44,9 @@
                 float4 vertex : SV_POSITION;
                 float3 normal : TEXCOORD0;
                 float4 worldPos : TEXCOORD1;
-                float4 lightClipPos : TEXCOORD2;
+                float4 lightClipPos0 : TEXCOORD2;
+                float4 lightClipPos1 : TEXCOORD3;
+                float4 lightClipPos2 : TEXCOORD4;
             };
 
             v2f vert (appdata v)
@@ -47,14 +55,16 @@
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.normal = UnityObjectToWorldNormal(v.normal);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-                o.lightClipPos = mul(_CustomLightSpaceMatrix, o.worldPos);
+                o.lightClipPos0 = mul(_CustomLightSpaceMatrix0, o.worldPos);
+                o.lightClipPos1 = mul(_CustomLightSpaceMatrix1, o.worldPos);
+                o.lightClipPos2 = mul(_CustomLightSpaceMatrix2, o.worldPos);
                 return o;
             }
 
-            float getDepth(float4 lightClipPos)
+            float getDepth(float4 lightClipPos, sampler2D shadowMap)
             {
                 float2 uv = 0.5 * lightClipPos.xy/lightClipPos.w + 0.5;
-                float depth = lightClipPos.z/lightClipPos.w;
+                float depth = saturate(lightClipPos.z/lightClipPos.w);
                 #if defined (SHADER_TARGET_GLSL) 
                     depth = depth * 0.5 + 0.5;
                 #elif defined (UNITY_REVERSED_Z)
@@ -66,7 +76,7 @@
                 {
                     for(float y = -_PCF_Range; y <= _PCF_Range; y++)
                     {
-                        samplerValue = tex2D(_CustomShadowMap, uv + float2(x, y) * _CustomShadowMap_TexelSize).r;
+                        samplerValue = tex2D(shadowMap, uv + float2(x, y) * _CustomShadowMap0_TexelSize).r;
                         shadowValue += samplerValue + _ShadowBias < depth ? _ShadowStrengthen : 1;
                     }
                 }
@@ -78,7 +88,7 @@
                 float3 worldLight = UnityWorldSpaceLightDir(i.worldPos);
                 float3 worldNormal = i.normal;
 
-                float shadowValue = getDepth(i.lightClipPos);
+                float shadowValue = min(min(getDepth(i.lightClipPos0, _CustomShadowMap0), getDepth(i.lightClipPos1, _CustomShadowMap1)), getDepth(i.lightClipPos2, _CustomShadowMap2));
 
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 

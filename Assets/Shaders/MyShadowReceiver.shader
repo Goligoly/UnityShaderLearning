@@ -77,7 +77,7 @@
                     for(float y = -_PCF_Range; y <= _PCF_Range; y++)
                     {
                         samplerValue = tex2D(shadowMap, uv + float2(x, y) * _CustomShadowMap0_TexelSize).r;
-                        shadowValue += samplerValue + _ShadowBias < depth ? _ShadowStrengthen : 1;
+                        shadowValue += samplerValue + _ShadowBias < depth ? 0 : 1;
                     }
                 }
                 return shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));
@@ -88,7 +88,8 @@
                 float3 worldLight = UnityWorldSpaceLightDir(i.worldPos);
                 float3 worldNormal = i.normal;
 
-                float shadowValue = min(min(getDepth(i.lightClipPos0, _CustomShadowMap0), getDepth(i.lightClipPos1, _CustomShadowMap1)), getDepth(i.lightClipPos2, _CustomShadowMap2));
+                float shadowValue = getDepth(i.lightClipPos0, _CustomShadowMap0) * getDepth(i.lightClipPos1, _CustomShadowMap1) * getDepth(i.lightClipPos2, _CustomShadowMap2);
+                shadowValue = max(_ShadowStrengthen, shadowValue);
 
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 

@@ -36,7 +36,7 @@ public class CascadedShadowmap : BaseShadowCamera
             float delta = (far - near) / cascadedLevels;
             CalcMainCameraFrustumCorners(near + level * delta, near + (level + 1) * delta, ref mainCamera_fcs[level]);
             CalcShadowCameraFrustum(ref shadowCamera_fcs[level], ref mainCamera_fcs[level]);
-            ResetShadowCamera();
+            ResetShadowCamera(ref shadowCamera_fcs[level]);
             ShadowTextureRender(shadowTexture[level], level);
         }
     }
@@ -54,7 +54,7 @@ public class CascadedShadowmap : BaseShadowCamera
         }
     }
 
-    protected void OnDrawGizmos()
+    void OnDrawGizmos()
     {
         if (mainCamera_fcs == null || shadowCamera_fcs == null) return;
         for (level = 0; level < cascadedLevels; level++)
@@ -72,16 +72,5 @@ public class CascadedShadowmap : BaseShadowCamera
         mainCamera_fcs = new FrustumCorners[cascadedLevels];
         shadowCamera_fcs = new FrustumCorners[cascadedLevels];
         shadowTexture = new RenderTexture[cascadedLevels];
-    }
-
-    protected void ResetShadowCamera()
-    {
-        Vector3 pos = shadowCamera_fcs[level].nearCorners[0] + 0.5f * (shadowCamera_fcs[level].nearCorners[2] - shadowCamera_fcs[level].nearCorners[0]);
-        shadowMapCam.transform.position = pos;
-        shadowMapCam.transform.rotation = directionalLight.transform.rotation;
-        shadowMapCam.nearClipPlane = 0;
-        shadowMapCam.farClipPlane = Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[0] - shadowCamera_fcs[level].farCorners[0]);
-        shadowMapCam.aspect = Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[1] - shadowCamera_fcs[level].nearCorners[0]) / Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[1] - shadowCamera_fcs[level].nearCorners[2]);
-        shadowMapCam.orthographicSize = Vector3.Magnitude(shadowCamera_fcs[level].nearCorners[1] - shadowCamera_fcs[level].nearCorners[2]) * 0.5f;
     }
 }

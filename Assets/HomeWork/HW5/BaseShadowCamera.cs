@@ -134,6 +134,17 @@ public class BaseShadowCamera : MonoBehaviour
         }
     }
 
+    protected void ResetShadowCamera(ref FrustumCorners shadowCam)
+    {
+        Vector3 pos = shadowCam.nearCorners[0] + 0.5f * (shadowCam.nearCorners[2] - shadowCam.nearCorners[0]);
+        shadowMapCam.transform.position = pos;
+        shadowMapCam.transform.rotation = directionalLight.transform.rotation;
+        shadowMapCam.nearClipPlane = 0;
+        shadowMapCam.farClipPlane = Vector3.Magnitude(shadowCam.nearCorners[0] - shadowCam.farCorners[0]);
+        shadowMapCam.aspect = Vector3.Magnitude(shadowCam.nearCorners[1] - shadowCam.nearCorners[0]) / Vector3.Magnitude(shadowCam.nearCorners[1] - shadowCam.nearCorners[2]);
+        shadowMapCam.orthographicSize = Vector3.Magnitude(shadowCam.nearCorners[1] - shadowCam.nearCorners[2]) * 0.5f;
+    }
+
     protected void ShadowTextureRender(RenderTexture renderTexture, int level)
     {
         shadowMapCam.targetTexture = renderTexture;

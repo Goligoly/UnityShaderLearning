@@ -21,7 +21,7 @@ public class CascadedShadowmap : BaseShadowCamera
         {
             InitFrustumCorners(ref mainCamera_fcs[level]);
             InitFrustumCorners(ref shadowCamera_fcs[level]);
-            InitShaderTexture(ref depthTexture[level], level);
+            InitDepthTexture(ref depthTexture[level], level);
         }
         Shader.SetGlobalFloat("_CascadedLevels", cascadedLevels);
     }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 public class BaseShadowCamera : MonoBehaviour
 {
     public enum ShadowMapResolution
@@ -48,7 +48,7 @@ public class BaseShadowCamera : MonoBehaviour
         frustumCorners.farCorners = new Vector3[4];
     }
 
-    protected void InitShaderTexture(ref RenderTexture renderTexture, int level)
+    protected void InitDepthTexture(ref RenderTexture renderTexture, int level)
     {
         renderTexture = new RenderTexture((int)shadowResolution, (int)shadowResolution, 32);
         Shader.SetGlobalTexture("_CustomShadowMap" + level, renderTexture);

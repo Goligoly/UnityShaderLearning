@@ -1,5 +1,9 @@
 ﻿Shader "Unlit/SSSMGenerator"
 {
+    Properties
+    {
+        [IntRange] _PCF_Range ("PCF range", Range(0, 5)) = 1
+    }
     SubShader
     {
         Pass
@@ -24,6 +28,8 @@
                 half2 uv_depth : TEXCOORD1;
                 float4 interpolatedRay : TEXCOORD2;
             };
+
+            float _PCF_Range;
 
             sampler2D _CustomShadowMap0;
             float4 _CustomShadowMap0_TexelSize;
@@ -65,9 +71,17 @@
                 #elif defined (UNITY_REVERSED_Z)
                     depth = 1 - depth;
                 #endif
-                float samplerValue = tex2D(_CustomShadowMap0, uv).r;
-                return samplerValue < depth ? 0 : 1;
-                // return samplerValue;
+                float shadowValue;
+                float samplerValue;
+                for(float x = -_PCF_Range; x <= _PCF_Range; x++)
+                {
+                    for(float y = -_PCF_Range; y <= _PCF_Range; y++)
+                    {
+                        samplerValue = tex2D(_CustomShadowMap0, uv + float2(x, y) * _CustomShadowMap0_TexelSize).r;
+                        shadowValue += samplerValue < depth ? 0 : 1;;
+                    }
+                }
+                return shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));
             }
 
             float4 frag (v2f i) : SV_Target

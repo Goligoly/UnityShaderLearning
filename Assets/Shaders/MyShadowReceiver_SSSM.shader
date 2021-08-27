@@ -2,9 +2,7 @@
 {
     Properties
     {
-        _ShadowBias ("Bias", Range(0, 0.1)) = 0.05
         _ShadowStrengthen ("Shadow Strengthen", Range(0,1)) = 0.3
-        [IntRange] _PCF_Range ("PCF range", Range(0, 5)) = 1
     }
     SubShader
     {
@@ -19,9 +17,7 @@
             #include "UnityCG.cginc"
             #include "Lighting.cginc"
 
-            float _ShadowBias;
             float _ShadowStrengthen;
-            float _PCF_Range;
 
             sampler2D _ScreenSpaceShadowMap;
             float4 __ScreenSpaceShadowMap_TexelSize;
@@ -53,7 +49,7 @@
                 float3 worldLight = UnityWorldSpaceLightDir(i.worldPos);
                 float3 worldNormal = i.normal;
 
-                float shadowValue = tex2D(_ScreenSpaceShadowMap, i.vertex.xy/_ScreenParams.xy);
+                float shadowValue = max(tex2D(_ScreenSpaceShadowMap, i.vertex.xy/_ScreenParams.xy), _ShadowStrengthen);
 
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 

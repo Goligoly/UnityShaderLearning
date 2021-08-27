@@ -19,9 +19,7 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
         InitFrustumCorners(ref mainCamera_fcs);
         InitFrustumCorners(ref shadowCamera_fcs);
         InitDepthTexture(ref lightSpaceDepthTexture, 0);
-        mainCameraDepthTexture = new RenderTexture(Screen.width, Screen.height, 32);
-        Camera.main.depthTextureMode |= DepthTextureMode.Depth;
-        Shader.SetGlobalFloat("_CascadedLevels", 1);
+        InitMainCamera();
     }
 
     // Update is called once per frame
@@ -48,6 +46,14 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
 
         Gizmos.color = Color.cyan;
         DrawFrustum(shadowCamera_fcs.nearCorners, shadowCamera_fcs.farCorners);
+    }
+
+    protected void InitMainCamera()
+    {
+        mainCameraDepthTexture = new RenderTexture(Screen.width, Screen.height, 32);
+        Camera.main.depthTextureMode |= DepthTextureMode.Depth;
+        Shader.SetGlobalFloat("_CascadedLevels", 1);
+        Shader.SetGlobalTexture("_ScreenSpaceShadowMap", mainCameraDepthTexture);
     }
 
     protected void GenerateSSSM()

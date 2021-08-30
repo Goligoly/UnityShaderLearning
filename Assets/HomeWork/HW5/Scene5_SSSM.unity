@@ -1029,7 +1029,11 @@ MonoBehaviour:
     type: 3}
   shadowResolution: 512
   mainCameraDepthTexture: {fileID: 0}
-  SSSMGenerator: {fileID: 2100000, guid: cc1947876783c304895387efb257e522, type: 2}
+  lightSpaceDepthTexture: {fileID: 0}
+  screenSpaceShadowTexture: {fileID: 0}
+  mainCameraDepthCaster: {fileID: 4800000, guid: 2df14672608a74d41a021bd3788096f5,
+    type: 3}
+  sssmGeneratorShader: {fileID: 4800000, guid: 5ebf707c59cd2de4cb8c7bb4589382bf, type: 3}
 --- !u!108 &1940277587
 Light:
   m_ObjectHideFlags: 0

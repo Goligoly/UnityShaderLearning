@@ -35,7 +35,7 @@
             float4 _CustomShadowMap0_TexelSize;
             float4x4 _CustomLightSpaceMatrix0;
 
-            sampler2D _CameraDepthTexture;
+            sampler2D _MainCameraDepthTexture;
             float4x4 _FrustumCornersRay;
 
             v2f vert (appdata v)
@@ -86,7 +86,7 @@
 
             float4 frag (v2f i) : SV_Target
             {
-                float linearDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv_depth));
+                float linearDepth = tex2D(_MainCameraDepthTexture, i.uv_depth).r * _ProjectionParams.z;
                 float3 worldPos = _WorldSpaceCameraPos + linearDepth * i.interpolatedRay.xyz;
                 float4 lightPos = mul(_CustomLightSpaceMatrix0, float4(worldPos, 1));
                 return float4(getDepth(lightPos).xxx, 1);

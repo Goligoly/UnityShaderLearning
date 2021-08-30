@@ -4,13 +4,17 @@ using UnityEngine;
 
 public class ScreenSpaceShadowmap : BaseShadowCamera
 {
-    public RenderTexture mainCameraDepthTexture;
+    public RenderTexture mainCameraDepthTexture, lightSpaceDepthTexture, screenSpaceShadowTexture;
 
-    public Material SSSMGenerator;
+    public Shader mainCameraDepthCaster, sssmGeneratorShader;
+
+    protected GameObject customCameraGO;
+
+    protected Camera customCam;
+
+    protected Material SSSMGenerator;
 
     protected FrustumCorners mainCamera_fcs, shadowCamera_fcs;
-
-    protected RenderTexture lightSpaceDepthTexture;
 
     // Start is called before the first frame update
     void Start()
@@ -25,6 +29,7 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
     // Update is called once per frame
     void Update()
     {
+        customCam.Render();
         CalcMainCameraFrustumCorners(Camera.main.nearClipPlane, Camera.main.farClipPlane, ref mainCamera_fcs);
         CalcShadowCameraFrustum(ref shadowCamera_fcs, ref mainCamera_fcs);
         ResetShadowCamera(ref shadowCamera_fcs);
@@ -35,8 +40,11 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
     void OnDisable()
     {
         shadowMapCam = null;
+        customCam = null;
+        DestroyImmediate(customCameraGO);
         DestroyImmediate(lightSpaceDepthTexture);
         DestroyImmediate(mainCameraDepthTexture);
+        DestroyImmediate(screenSpaceShadowTexture);
     }
 
     void OnDrawGizmos()
@@ -51,9 +59,22 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
     protected void InitMainCamera()
     {
         mainCameraDepthTexture = new RenderTexture(Screen.width, Screen.height, 32);
-        Camera.main.depthTextureMode |= DepthTextureMode.Depth;
+        screenSpaceShadowTexture = new RenderTexture(Screen.width, Screen.height, 32);
         Shader.SetGlobalFloat("_CascadedLevels", 1);
-        Shader.SetGlobalTexture("_ScreenSpaceShadowMap", mainCameraDepthTexture);
+        Shader.SetGlobalTexture("_MainCameraDepthTexture", mainCameraDepthTexture);
+        Shader.SetGlobalTexture("_ScreenSpaceShadowMap", screenSpaceShadowTexture);
+
+        SSSMGenerator = new Material(sssmGeneratorShader);
+
+        customCameraGO = new GameObject("Screen Depth Camera");
+        customCameraGO.transform.parent = base.transform;
+        customCam = customCameraGO.AddComponent<Camera>();
+        customCam.CopyFrom(Camera.main);
+        customCam.backgroundColor = Color.white;
+        customCam.clearFlags = CameraClearFlags.SolidColor;
+        customCam.enabled = false;
+        customCam.targetTexture = mainCameraDepthTexture;
+        customCam.SetReplacementShader(mainCameraDepthCaster, null);
     }
 
     protected void GenerateSSSM()
@@ -93,6 +114,6 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
 
         SSSMGenerator.SetMatrix("_FrustumCornersRay", frustumCorners);
 
-        Graphics.Blit(mainCameraDepthTexture, mainCameraDepthTexture, SSSMGenerator);
+        Graphics.Blit(screenSpaceShadowTexture, screenSpaceShadowTexture, SSSMGenerator);
     }
 }

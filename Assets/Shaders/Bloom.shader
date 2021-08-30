@@ -62,7 +62,7 @@
 
             fixed4 fragExtractBright(v2f i) : SV_Target {
                 fixed4 c = tex2D(_MainTex, i.uv);
-                fixed val = clamp(luminance(c) - _LuminanceThreshold, 0.0, 1.0);
+                fixed4 val = clamp(c - _LuminanceThreshold, 0.0, 1.0);
                 
                 return val;
             }

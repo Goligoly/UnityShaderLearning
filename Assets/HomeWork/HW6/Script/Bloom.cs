@@ -20,6 +20,9 @@ public class Bloom : PostEffectBase
 	[Range(0, 4)]
 	public int iterations = 3;
 
+	[Range(0, 8)]
+	public int scale = 2;
+
 	// Blur spread for each iteration - larger value means more blur
 	[Range(0.2f, 3.0f)]
 	public float blurSpread = 0.6f;
@@ -33,8 +36,8 @@ public class Bloom : PostEffectBase
 		{
 			material.SetFloat("_LuminanceThreshold", luminanceThreshold);
 
-			var rtW = src.width;
-			var rtH = src.height;
+			var rtW = src.width / scale;
+			var rtH = src.height / scale;
 
 			RenderTexture buffer0 = RenderTexture.GetTemporary(rtW, rtH, 0);
 			buffer0.filterMode = FilterMode.Bilinear;

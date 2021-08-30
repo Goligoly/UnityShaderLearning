@@ -310,11 +310,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa49683ac150f304aa281b166de5a0ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bloomShader: {fileID: 0}
+  bloomShader: {fileID: 4800000, guid: e120646c2288527479e2abc1d4ce3a57, type: 3}
   iterations: 3
   blurSpread: 0.6
-  downSample: 2
-  luminanceThreshold: 0.6
+  luminanceThreshold: 0.8
 --- !u!1 &281703422
 GameObject:
   m_ObjectHideFlags: 0

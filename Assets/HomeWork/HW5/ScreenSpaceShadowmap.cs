@@ -67,7 +67,7 @@ public class ScreenSpaceShadowmap : BaseShadowCamera
         SSSMGenerator = new Material(sssmGeneratorShader);
 
         customCameraGO = new GameObject("Screen Depth Camera");
-        customCameraGO.transform.parent = base.transform;
+        customCameraGO.transform.parent = Camera.main.transform;
         customCam = customCameraGO.AddComponent<Camera>();
         customCam.CopyFrom(Camera.main);
         customCam.backgroundColor = Color.white;

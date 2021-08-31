@@ -91,9 +91,9 @@
                 float3 worldNormal = i.normal;
 
                 float shadowValue = 1;
-                if(_CascadedLevels > 0) shadowValue *= getDepth(i.lightClipPos0, _CustomShadowMap0);
-                if(_CascadedLevels > 1) shadowValue *= getDepth(i.lightClipPos1, _CustomShadowMap1);
-                if(_CascadedLevels > 2) shadowValue *= getDepth(i.lightClipPos2, _CustomShadowMap2);
+                if(_CascadedLevels > 0) shadowValue = min(shadowValue, getDepth(i.lightClipPos0, _CustomShadowMap0));
+                if(_CascadedLevels > 1) shadowValue = min(shadowValue, getDepth(i.lightClipPos1, _CustomShadowMap1));
+                if(_CascadedLevels > 2) shadowValue = min(shadowValue, getDepth(i.lightClipPos2, _CustomShadowMap2));
                 shadowValue = max(_ShadowStrengthen, shadowValue);
 
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;

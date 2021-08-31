@@ -12,6 +12,8 @@ public class CascadedShadowmap : BaseShadowCamera
 
     protected RenderTexture[] depthTexture;
 
+    protected float[] mainCameraCascaded = { 0.0f, 0.1f, 0.3f, 1.0f };
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,8 +36,8 @@ public class CascadedShadowmap : BaseShadowCamera
         {
             float near = Camera.main.nearClipPlane;
             float far = Camera.main.farClipPlane;
-            float delta = (far - near) / cascadedLevels;
-            CalcMainCameraFrustumCorners(near + level * delta, near + (level + 1) * delta, ref mainCamera_fcs[level]);
+            float delta = far - near;
+            CalcMainCameraFrustumCorners(near + mainCameraCascaded[level] * delta, near + mainCameraCascaded[level + 1] * delta, ref mainCamera_fcs[level]);
             CalcShadowCameraFrustum(ref shadowCamera_fcs[level], ref mainCamera_fcs[level]);
             ResetShadowCamera(ref shadowCamera_fcs[level]);
             ShadowTextureRender(depthTexture[level], level);

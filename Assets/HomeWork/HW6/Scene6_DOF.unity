@@ -172,7 +172,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 100
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -198,8 +198,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 193436646}
-  m_LocalRotation: {x: -0.23542327, y: 0.57796645, z: -0.17863293, w: -0.76067144}
-  m_LocalPosition: {x: 13.4551525, y: 2.010282, z: 2.6266584}
+  m_LocalRotation: {x: 0.24246235, y: 0.52805257, z: -0.16131344, w: 0.79771584}
+  m_LocalPosition: {x: -0.37777233, y: 2.445323, z: 2.8616052}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -217,9 +217,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ae1668fa4de3044a73b9257f80b091, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dofShader: {fileID: 0}
+  dofShader: {fileID: 4800000, guid: 5000961efefbd5141b6e7254f81744fc, type: 3}
   renderTarget: {fileID: 4890024346617185373, guid: 200d51e12a1f52e45b885adec0f4c215,
     type: 3}
+  focusDistance: 0.08
+  focusRange: 0.03
 --- !u!1 &919171164
 GameObject:
   m_ObjectHideFlags: 0
@@ -400,7 +402,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1758763805}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 40, y: 0, z: 20}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_Children: []
   m_Father: {fileID: 0}

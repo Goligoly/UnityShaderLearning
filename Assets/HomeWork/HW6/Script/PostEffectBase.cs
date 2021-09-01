@@ -5,38 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class PostEffectBase : MonoBehaviour
 {
-	protected void Start()
-	{
-		CheckResources();
-	}
-
-	protected void CheckResources()
-	{
-		bool isSupported = CheckSupport();
-
-		if (isSupported == false)
-		{
-			NotSupported();
-		}
-	}
-
-	protected bool CheckSupport()
-	{
-		if (SystemInfo.supportsImageEffects == false || SystemInfo.supportsRenderTextures == false)
-		{
-			Debug.LogWarning("This platform does not support image effects or render textures.");
-			return false;
-		}
-
-		return true;
-	}
-
-	// Called when the platform doesn't support this effect
-	protected void NotSupported()
-	{
-		enabled = false;
-	}
-
 	// Called when need to create the material used by this effect
 	protected Material CheckShaderAndCreateMaterial(Shader shader, Material material)
 	{

@@ -16,20 +16,55 @@ public class DepthOfFocus : PostEffectBase
     }
 
     public GameObject renderTarget;
-    protected int rowGO = 10, columnGO = 6;
+
+    [Range(0, 1.0f)]
+    public float focusDistance = 0.5f;
+
+    [Range(0, 0.5f)]
+    public float focusRange = 0.1f;
+
+    [Range(1, 10.0f)]
+    public float bokehRadius = 4.0f;
+
+    protected int rowGO = 20, columnGO = 8;
     protected float distance = 1.5f;
     protected GameObject root;
 
     // Start is called before the first frame update
     void Start()
     {
+        Camera.main.depthTextureMode |= DepthTextureMode.Depth;
         InitScene();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        material.SetFloat("_BokehRadius", bokehRadius);
+        material.SetFloat("_FocusDistance", focusDistance);
+        material.SetFloat("_FocusRange", focusRange);
+    }
+
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    {
+        int halfW = source.width / 2;
+        int halfH = source.height / 2;
+        RenderTextureFormat format = source.format;
+        RenderTexture coc = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.RHalf, RenderTextureReadWrite.Linear);
+        RenderTexture bokeh1 = RenderTexture.GetTemporary(halfW, halfH, 0, format);
+        RenderTexture bokeh2 = RenderTexture.GetTemporary(halfW, halfH, 0, format);
+
+        material.SetTexture("_CocTex", coc);
+
+        Graphics.Blit(source, coc, material, 0);
+        Graphics.Blit(source, bokeh1, material, 1);
+        Graphics.Blit(bokeh1, bokeh2, material, 2);
+        Graphics.Blit(bokeh2, bokeh1, material, 3);
+        Graphics.Blit(bokeh1, destination);
+
+        RenderTexture.ReleaseTemporary(coc);
+        RenderTexture.ReleaseTemporary(bokeh1);
+        RenderTexture.ReleaseTemporary(bokeh2);
     }
 
     protected void InitScene()

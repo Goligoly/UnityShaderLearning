@@ -9,7 +9,7 @@
         CGINCLUDE
         #include "UnityCG.cginc"
 
-        sampler2D _MainTex, _CameraDepthTexture, _CocTex;
+        sampler2D _MainTex, _CameraDepthTexture, _CocTex, _DofTex;
         float4 _MainTex_ST, _MainTex_TexelSize;
 
         float _FocusDistance, _FocusRange, _BokehRadius;
@@ -161,6 +161,26 @@
                 float4 o = _MainTex_TexelSize.xyxy * float2(-0.5, 0.5).xxyy;
                 float4 color = tex2D(_MainTex, i.uv + o.xy) + tex2D(_MainTex, i.uv + o.zy) + tex2D(_MainTex, i.uv + o.xw) + tex2D(_MainTex, i.uv + o.zw);
                 return color *= 0.25;
+            }
+            ENDCG
+        }
+
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment fragCombine
+
+            float4 fragCombine (v2f i) : SV_Target
+            {
+                float4 source = tex2D(_MainTex, i.uv);
+                float4 dof = tex2D(_DofTex, i.uv);
+                float coc = tex2D(_CocTex, i.uv).r;
+
+                float dofStrength = smoothstep(0.1, 1, abs(coc));
+                float3 color = lerp(source.rgb, dof.rgb, dofStrength);
+
+                return float4(color, source.a);
             }
             ENDCG
         }

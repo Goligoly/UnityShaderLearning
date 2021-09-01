@@ -55,12 +55,13 @@ public class DepthOfFocus : PostEffectBase
         RenderTexture bokeh2 = RenderTexture.GetTemporary(halfW, halfH, 0, format);
 
         material.SetTexture("_CocTex", coc);
+        material.SetTexture("_DofTex", bokeh1);
 
         Graphics.Blit(source, coc, material, 0);
         Graphics.Blit(source, bokeh1, material, 1);
         Graphics.Blit(bokeh1, bokeh2, material, 2);
         Graphics.Blit(bokeh2, bokeh1, material, 3);
-        Graphics.Blit(bokeh1, destination);
+        Graphics.Blit(source, destination, material, 4);
 
         RenderTexture.ReleaseTemporary(coc);
         RenderTexture.ReleaseTemporary(bokeh1);

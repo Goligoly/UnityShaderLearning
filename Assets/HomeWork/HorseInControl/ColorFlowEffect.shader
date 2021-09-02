@@ -10,7 +10,7 @@
         #include "UnityCG.cginc"
 
         sampler2D _MainTex, _Buffer0, _Buffer1;
-        float4 _MainTex_ST, _MainTex_TexelSize, _Direction;
+        float4 _MainTex_ST, _MainTex_TexelSize, _Direction, _TargetPosition;
 
         struct appdata
         {
@@ -34,12 +34,13 @@
 
         float2 ScreenToMiddle(float2 uv)
         {
+            uv = uv - _TargetPosition.xy;
             return (uv * 2 - 1) * _ScreenParams.xy / _ScreenParams.y;
         }
 
         float2 MiddleToScreen(float2 xy)
         {
-            return (xy * _ScreenParams.y / _ScreenParams.xy) * 0.5 + 0.5;
+            return (xy * _ScreenParams.y / _ScreenParams.xy) * 0.5 + 0.5 + _TargetPosition.xy;
         }
 
         float getRandom(float2 xy)
@@ -59,9 +60,9 @@
             {
                 float2 xy = ScreenToMiddle(i.uv);
                 float count = 5;
-                float a = ceil(dot(normalize(xy), float2(0, 1)) * count)/count;
-                float b = ceil(dot(normalize(xy), float2(-1, 0)) * count)/count;
-                float bias = getRandom(float2(a, b));
+                float a = ceil(dot(normalize(xy), float2(-sin(_Time.x), cos(_Time.x))) * count)/count;
+                float b = ceil(dot(normalize(xy), float2(-cos(_Time.x), sin(_Time.x))) * count)/count;
+                float bias = getRandom(float2(a, b)) * 0.5 + sin(_Time.y) * 0.25;
 
                 return tex2D(_MainTex, i.uv) * bias;
             }
@@ -77,14 +78,22 @@
             float4 fragFlow (v2f i) : SV_Target
             {
                 float scale = 0.001;
-                float2 dir1 = _Direction.xy;
-                float2 dir2 = _Direction.zw;
+                float2 xy = ScreenToMiddle(i.uv);
+                float2 weight = (length(xy) - 0.2)/1.2;
+                float2 dir = _Direction.xy;
+                float2 norm = _Direction.zw;
+                if(_Direction.x < 0.01 && _Direction.y < 0.01){
+                    dir = -xy/length(xy);
+                    norm = -float2(xy.y, -xy.x)/length(xy);
+                }
+                dir *= lerp(5, 3, weight);
+                norm *= lerp(3, 8, weight);
 
                 float3 color = 0;
                 for(float m=0; m<3; m++){
                     for(float n=-1; n<=1; n++){
-                        float2 o = m*dir1 + n*dir2;
-                        color += tex2D(_MainTex, i.uv + o * scale).rgb;
+                        float2 o = m*dir + n*norm;
+                        color += tex2D(_MainTex, MiddleToScreen(xy + o * scale)).rgb;
                     }
                 }
                 color /= 9;

@@ -218,7 +218,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colorFlowShader: {fileID: 4800000, guid: c4aec2fa926bb21428839f19fc7fe8bd, type: 3}
-  lastRender: {fileID: 0}
+  angle: -1
+  renderTarget: {fileID: 2014364503}
 --- !u!1 &1868633990
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,7 +9,7 @@
         CGINCLUDE
         #include "UnityCG.cginc"
 
-        sampler2D _MainTex, _CameraDepthTexture, _LastRender, _Buffer0, _Buffer1;
+        sampler2D _MainTex, _CameraDepthTexture, _LastRender, _Buffer0, _Buffer1, _FlowNoise;
         float4 _MainTex_ST, _MainTex_TexelSize, _Direction, _TargetPosition;
 
         struct appdata
@@ -111,6 +111,12 @@
             #pragma vertex vert
             #pragma fragment fragFlow
 
+            float getFlowNoise(float2 uv)
+            {
+                uv += _Time.y * float2(0.05, 0.02);
+                return tex2D(_FlowNoise, uv).r * 2 - 1;
+            }
+
             float4 fragFlow (v2f i) : SV_Target
             {
                 float scale = 0.001;
@@ -123,6 +129,8 @@
                     dir = -xy/distance;
                     norm = -float2(xy.y, -xy.x)/distance;
                 }
+                float noiseRadian = getFlowNoise(i.uv) * 3.14159/3;
+                dir = cos(noiseRadian)*dir + sin(noiseRadian)*float2(dir.y, -dir.x);
                 dir *= lerp(5, 3, weight);
                 norm *= lerp(3, 8, weight);
 

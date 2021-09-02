@@ -17,6 +17,8 @@ public class ColorFlowEffect : PostEffectBase
 
     public GameObject renderTarget;
 
+    public Texture flowNoise;
+
     private RenderTexture lastRender;
 
     private float speed = 1.5f;
@@ -29,6 +31,8 @@ public class ColorFlowEffect : PostEffectBase
         material.SetTexture("_LastRender", lastRender);
         Camera.main.depthTextureMode |= DepthTextureMode.Depth;
 
+        material.SetTexture("_FlowNoise", flowNoise);
+
         lastPos = Camera.main.WorldToScreenPoint(renderTarget.transform.position);
         currentPos = lastPos;
     }
@@ -38,6 +42,7 @@ public class ColorFlowEffect : PostEffectBase
         currentPos = Camera.main.WorldToScreenPoint(renderTarget.transform.position);
         Vector2 dir = (currentPos - lastPos).normalized;
         direction += dir * 0.01f;
+        if (direction.magnitude > 1) direction = direction.normalized;
         lastPos = currentPos;
 
         if (Input.GetKey(KeyCode.W))

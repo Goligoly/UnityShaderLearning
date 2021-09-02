@@ -219,6 +219,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   colorFlowShader: {fileID: 4800000, guid: c4aec2fa926bb21428839f19fc7fe8bd, type: 3}
   renderTarget: {fileID: 1479418374}
+  flowNoise: {fileID: 2800000, guid: da0e881a7228e3e4285ae8ad0a5f2bc1, type: 3}
 --- !u!1 &1479418374
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,6 +22,8 @@ public class ColorFlowEffect : PostEffectBase
     private void Start()
     {
         lastRender = new RenderTexture(Camera.main.pixelWidth, Camera.main.pixelHeight, 32);
+        material.SetTexture("_LastRender", lastRender);
+        Camera.main.depthTextureMode |= DepthTextureMode.Depth;
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -33,7 +35,6 @@ public class ColorFlowEffect : PostEffectBase
         targetScrPos.x /= Screen.width;
         targetScrPos.y /= Screen.height;
         targetScrPos -= new Vector3(0.5f, 0.5f, 0);
-        Debug.Log(targetScrPos);
         material.SetVector("_TargetPosition", new Vector4(targetScrPos.x, targetScrPos.y, 0, 0));
 
         material.SetTexture("_Buffer0", buffer0);
@@ -44,7 +45,7 @@ public class ColorFlowEffect : PostEffectBase
         Graphics.Blit(source, buffer0, material, 0);
         Graphics.Blit(lastRender, buffer1, material, 1);
         Graphics.Blit(null, lastRender, material, 2);
-        Graphics.Blit(lastRender, destination);
+        Graphics.Blit(source, destination, material, 3);
 
         RenderTexture.ReleaseTemporary(buffer0);
         RenderTexture.ReleaseTemporary(buffer1);

@@ -134,7 +134,7 @@
                     }
                 }
                 color /= 9;
-                return float4(color, 1);
+                return float4(color, 1) * lerp(1, 0.95, saturate(distance - 1)) ;
             }
             ENDCG
         }

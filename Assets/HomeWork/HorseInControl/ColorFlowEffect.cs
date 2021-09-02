@@ -19,11 +19,46 @@ public class ColorFlowEffect : PostEffectBase
 
     private RenderTexture lastRender;
 
+    private float speed = 1.5f;
+
+    private Vector2 direction = new Vector2(0, 0), lastPos, currentPos;
+
     private void Start()
     {
         lastRender = new RenderTexture(Camera.main.pixelWidth, Camera.main.pixelHeight, 32);
         material.SetTexture("_LastRender", lastRender);
         Camera.main.depthTextureMode |= DepthTextureMode.Depth;
+
+        lastPos = Camera.main.WorldToScreenPoint(renderTarget.transform.position);
+        currentPos = lastPos;
+    }
+
+    private void Update()
+    {
+        currentPos = Camera.main.WorldToScreenPoint(renderTarget.transform.position);
+        Vector2 dir = (currentPos - lastPos).normalized;
+        direction += dir * 0.01f;
+        lastPos = currentPos;
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            transform.Translate(Vector3.down * Time.deltaTime * speed);
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            transform.Translate(Vector3.up * Time.deltaTime * speed);
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            transform.Translate(Vector3.right * Time.deltaTime * speed);
+        }
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            transform.Translate(Vector3.left * Time.deltaTime * speed);
+        }
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -31,7 +66,7 @@ public class ColorFlowEffect : PostEffectBase
         RenderTexture buffer0 = RenderTexture.GetTemporary(source.width, source.height, 0);
         RenderTexture buffer1 = RenderTexture.GetTemporary(source.width, source.height, 0);
 
-        Vector3 targetScrPos = Camera.main.WorldToScreenPoint(renderTarget.transform.position);
+        Vector3 targetScrPos = currentPos;
         targetScrPos.x /= Screen.width;
         targetScrPos.y /= Screen.height;
         targetScrPos -= new Vector3(0.5f, 0.5f, 0);
@@ -40,7 +75,7 @@ public class ColorFlowEffect : PostEffectBase
         material.SetTexture("_Buffer0", buffer0);
         material.SetTexture("_Buffer1", buffer1);
 
-        material.SetVector("_Direction", new Vector4(0, 0, 0, 0));
+        material.SetVector("_Direction", direction);
 
         Graphics.Blit(source, buffer0, material, 0);
         Graphics.Blit(lastRender, buffer1, material, 1);

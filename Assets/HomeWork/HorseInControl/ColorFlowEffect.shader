@@ -89,7 +89,7 @@
                 float count = 5;
                 float a = ceil(dot(normalize(xy), float2(-sin(_Time.x), cos(_Time.x))) * count)/count;
                 float b = ceil(dot(normalize(xy), float2(-cos(_Time.x), sin(_Time.x))) * count)/count;
-                float bias = getRandom(float2(a, b)) * 0.5 + sin(_Time.y) * 0.25;
+                float bias = getRandom(float2(a, b)) * 0.8 - sin(_Time.y) * 0.2 - 0.2;
 
                 float sample1 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[1]));
                 float sample2 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[2]));
@@ -115,12 +115,13 @@
             {
                 float scale = 0.001;
                 float2 xy = ScreenToMiddle(i.uv);
-                float2 weight = (length(xy) - 0.2)/1.2;
+                float distance = length(xy);
+                float2 weight = (distance - 0.2)/1.2;
                 float2 dir = _Direction.xy;
-                float2 norm = _Direction.zw;
-                if(_Direction.x < 0.01 && _Direction.y < 0.01){
-                    dir = -xy/length(xy);
-                    norm = -float2(xy.y, -xy.x)/length(xy);
+                float2 norm = float2(_Direction.y, -_Direction.x);
+                if(abs(_Direction.x) < 0.01 && abs(_Direction.y) < 0.01){
+                    dir = -xy/distance;
+                    norm = -float2(xy.y, -xy.x)/distance;
                 }
                 dir *= lerp(5, 3, weight);
                 norm *= lerp(3, 8, weight);

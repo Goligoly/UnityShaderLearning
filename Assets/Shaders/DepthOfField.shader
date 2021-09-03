@@ -130,22 +130,36 @@
                 };
             #endif
 
+            float weigh(float a, float b)
+            {
+                return saturate((max(0, a) - b + 2) / 2);
+            }
+
             float4 fragBokeh (v2f i) : SV_Target
             {
-                float3 color = 0;
-                float weight = 0;
+                float coc = tex2D(_MainTex, i.uv).a;
+
+                float3 bgcolor = 0, fgcolor = 0;
+                float bgweight = 0, fgweight = 0;
                 for(int k = 0; k < kernelSampleCount; k++)
                 {
                     float2 o = kernel[k] * _BokehRadius;
                     float radius = length(o);
                     o *= _MainTex_TexelSize;
                     float4 sample = tex2D(_MainTex, i.uv + o);
-                    float sw = saturate((abs(sample.a) - radius + 2) / 2);
-                    color += sample.rgb * sw;
-                    weight += sw;
+                    float bgw = weigh(min(sample.a, coc), radius);
+                    bgcolor += sample.rgb * bgw;
+                    bgweight += bgw;
+
+                    float fgw = weigh(-sample.a, radius);
+                    fgcolor += sample.rgb * fgw;
+                    fgweight += fgw;
                 }
-                color /= weight;
-                return float4(color, 1);
+                bgcolor /= bgweight;
+                fgcolor /= fgweight;
+                float bgfg = fgweight/(fgweight + bgweight);
+                float3 color = lerp(bgcolor, fgcolor, bgfg);
+                return float4(color, bgfg);
             }
             ENDCG
         }
@@ -177,8 +191,8 @@
                 float4 dof = tex2D(_DofTex, i.uv);
                 float coc = tex2D(_CocTex, i.uv).r;
 
-                float dofStrength = smoothstep(0.1, 1, abs(coc));
-                float3 color = lerp(source.rgb, dof.rgb, dofStrength);
+                float dofStrength = smoothstep(0.1, 1, coc);
+                float3 color = lerp(source.rgb, dof.rgb, dofStrength + dof.a - dofStrength * dof.a);
 
                 return float4(color, source.a);
             }

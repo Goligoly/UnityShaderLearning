@@ -73,20 +73,21 @@
                     depth = 1 - depth;
                 #endif
                 depth = saturate(depth);
-                float shadowValue = tex2D(shadowMap, uv).r + _ShadowBias < depth ? 0 : 1;
-                float2 isInNDC = 1 - saturate(floor(abs(lightNdcPos.xy)));
-                return lerp(1, shadowValue, isInNDC.x * isInNDC.y);
-                // float shadowValue;
-                // float samplerValue;
-                // for(float x = -_PCF_Range; x <= _PCF_Range; x++)
-                // {
-                //     for(float y = -_PCF_Range; y <= _PCF_Range; y++)
-                //     {
-                //         samplerValue = tex2D(shadowMap, uv + float2(x, y) * _CustomShadowMap0_TexelSize).r;
-                //         shadowValue += samplerValue + _ShadowBias < depth ? 0 : 1;
-                //     }
-                // }
-                // return shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));
+                
+                float shadowValue;
+                float samplerValue;
+                for(float x = -_PCF_Range; x <= _PCF_Range; x++)
+                {
+                    for(float y = -_PCF_Range; y <= _PCF_Range; y++)
+                    {
+                        samplerValue = tex2D(shadowMap, uv + float2(x, y) * _CustomShadowMap0_TexelSize).r;
+                        shadowValue += samplerValue + _ShadowBias < depth ? 0 : 1;
+                    }
+                }
+                float2 isInNDC = uv.x < 1 && uv.x > 0 && uv.y < 1 && uv.y > 0;
+                shadowValue = shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));
+                shadowValue = lerp(1, shadowValue, isInNDC.x * isInNDC.y);
+                return shadowValue;
             }
 
             float4 frag (v2f i) : SV_Target
@@ -95,10 +96,9 @@
                 float3 worldNormal = i.normal;
 
                 float shadowValue = 1;
-                if(_CascadedLevels > 0) shadowValue *= getDepth(i.lightNdcPos0, _CustomShadowMap0);
-                if(_CascadedLevels > 1) shadowValue *= getDepth(i.lightNdcPos1, _CustomShadowMap1);
-                if(_CascadedLevels > 2) shadowValue *= getDepth(i.lightNdcPos2, _CustomShadowMap2);
-                shadowValue = max(_ShadowStrengthen, shadowValue);
+                if(_CascadedLevels > 0) shadowValue = min(shadowValue, getDepth(i.lightNdcPos0, _CustomShadowMap0));
+                if(_CascadedLevels > 1) shadowValue = min(shadowValue, getDepth(i.lightNdcPos1, _CustomShadowMap1));
+                if(_CascadedLevels > 2) shadowValue = min(shadowValue, getDepth(i.lightNdcPos2, _CustomShadowMap2));
 
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.rgb;
 

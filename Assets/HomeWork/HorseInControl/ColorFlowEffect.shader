@@ -157,7 +157,7 @@
                     float2 o = kern.x*dir + kern.y*norm;
                     color += kern.z * tex2D(_MainTex, MiddleToScreen(xy + o * scale)).rgb;
                 }
-                return float4(color, 1) * lerp(float4(1,1,1,1), float4(0.97, 0.95, 0.96, 1), saturate(dist - 1)) ;
+                return float4(color, 1) * lerp(float4(1,1,1,1), float4(0.97, 0.95, 0.96, 1), smoothstep(1, 2, dist)) ;
             }
             ENDCG
         }

@@ -11,6 +11,7 @@
 
         sampler2D _MainTex, _CameraDepthTexture, _LastRender, _Buffer0, _Buffer1, _FlowNoise;
         float4 _MainTex_ST, _MainTex_TexelSize, _Direction, _TargetPosition;
+        float _EdgeWidth;
 
         struct appdata
         {
@@ -69,10 +70,10 @@
                 float2 uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.uv[0] = uv;
 
-                o.uv[1] = uv + _MainTex_TexelSize.xy * float2(1,1) * 1;
-                o.uv[2] = uv + _MainTex_TexelSize.xy * float2(-1,-1) * 1;
-                o.uv[3] = uv + _MainTex_TexelSize.xy * float2(1,-1) * 1;
-                o.uv[4] = uv + _MainTex_TexelSize.xy * float2(-1,1) * 1;
+                o.uv[1] = uv + _MainTex_TexelSize.xy * float2(1,1) * _EdgeWidth;
+                o.uv[2] = uv + _MainTex_TexelSize.xy * float2(-1,-1) * _EdgeWidth;
+                o.uv[3] = uv + _MainTex_TexelSize.xy * float2(1,-1) * _EdgeWidth;
+                o.uv[4] = uv + _MainTex_TexelSize.xy * float2(-1,1) * _EdgeWidth;
                 return o;
             }
 
@@ -91,6 +92,7 @@
                 float b = ceil(dot(normalize(xy), float2(-cos(_Time.x), sin(_Time.x))) * count)/count;
                 float bias = getRandom(float2(a, b)) * 0.8 - sin(_Time.y) * 0.2 - 0.2;
 
+                float sample0 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[0]));
                 float sample1 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[1]));
                 float sample2 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[2]));
                 float sample3 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[3]));
@@ -100,7 +102,9 @@
                 edge *= CheckSame(sample1, sample2);
                 edge *= CheckSame(sample3, sample4);
 
-                return lerp(float4(0, 1, 1, 0), float4(0, 0, 0, 1), edge) * bias;
+                float isObject = sample0 < 1;
+                float3 color = lerp(tex2D(_MainTex, i.uv[0]).rgb, float3(0, 0, 0), edge) * bias * isObject;
+                return float4(color, isObject);
             }
             ENDCG
         }
@@ -179,7 +183,9 @@
 
             float4 fragFinal (v2f i) : SV_Target
             {
-                return max(tex2D(_MainTex, i.uv), tex2D(_LastRender, i.uv));
+                float isObject = tex2D(_Buffer0, i.uv).a;
+                float4 color = tex2D(_MainTex, i.uv);
+                return lerp(color + tex2D(_LastRender, i.uv), color, isObject);
             }
             ENDCG
         }

@@ -19,6 +19,9 @@ public class ColorFlowEffect : PostEffectBase
 
     public Texture flowNoise;
 
+    [Range(1, 10)]
+    public float edgeWidth = 2.0f;
+
     private RenderTexture lastRender;
 
     private float speed = 1.5f;
@@ -68,6 +71,7 @@ public class ColorFlowEffect : PostEffectBase
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
+        material.SetFloat("_EdgeWidth", edgeWidth);
         RenderTexture buffer0 = RenderTexture.GetTemporary(source.width, source.height, 0);
         RenderTexture buffer1 = RenderTexture.GetTemporary(source.width, source.height, 0);
 

@@ -111,6 +111,19 @@
             #pragma vertex vert
             #pragma fragment fragFlow
 
+            static const int kernelSampleCount = 9;
+            static const float3 kernel[kernelSampleCount] = {
+                float3(1, 0, 0.3),
+                float3(2, 0, 0.2),
+                float3(3, 0, 0.1),
+                float3(1, 1, 0.1),
+                float3(2, 1, 0.05),
+                float3(3, 1, 0.05),
+                float3(1, -1, 0.1),
+                float3(2, -1, 0.05),
+                float3(3, -1, 0.05)
+            };
+
             float getFlowNoise(float2 uv)
             {
                 uv += _Time.y * float2(0.05, 0.02);
@@ -121,28 +134,26 @@
             {
                 float scale = 0.001;
                 float2 xy = ScreenToMiddle(i.uv);
-                float distance = length(xy);
-                float2 weight = (distance - 0.2)/1.2;
+                float dist = length(xy);
+                float2 weight = (dist - 0.2)/1.2;
                 float2 dir = _Direction.xy;
                 float2 norm = float2(_Direction.y, -_Direction.x);
                 if(abs(_Direction.x) < 0.01 && abs(_Direction.y) < 0.01){
-                    dir = -xy/distance;
-                    norm = -float2(xy.y, -xy.x)/distance;
+                    dir = -xy/dist;
+                    norm = -float2(xy.y, -xy.x)/dist;
                 }
                 float noiseRadian = getFlowNoise(i.uv) * 3.14159/3;
                 dir = cos(noiseRadian)*dir + sin(noiseRadian)*float2(dir.y, -dir.x);
                 dir *= lerp(5, 3, weight);
-                norm *= lerp(3, 8, weight);
+                norm *= lerp(0.5, 8, weight);
 
                 float3 color = 0;
-                for(float m=0; m<3; m++){
-                    for(float n=-1; n<=1; n++){
-                        float2 o = m*dir + n*norm;
-                        color += tex2D(_MainTex, MiddleToScreen(xy + o * scale)).rgb;
-                    }
+                for(float m=0; m<kernelSampleCount; m++){
+                    float3 kern = kernel[m];
+                    float2 o = kern.x*dir + kern.y*norm;
+                    color += kern.z * tex2D(_MainTex, MiddleToScreen(xy + o * scale)).rgb;
                 }
-                color /= 9;
-                return float4(color, 1) * lerp(1, 0.95, saturate(distance - 1)) ;
+                return float4(color, 1) * lerp(float4(1,1,1,1), float4(0.97, 0.95, 0.96, 1), saturate(dist - 1)) ;
             }
             ENDCG
         }

@@ -139,7 +139,7 @@
                 float scale = 0.001;
                 float2 xy = ScreenToMiddle(i.uv);
                 float dist = length(xy);
-                float2 weight = (dist - 0.2)/1.2;
+                float2 weight = smoothstep(0.8, 1.5, dist);
                 float2 dir = _Direction.xy;
                 float2 norm = float2(_Direction.y, -_Direction.x);
                 if(abs(_Direction.x) < 0.01 && abs(_Direction.y) < 0.01){
@@ -148,8 +148,8 @@
                 }
                 float noiseRadian = getFlowNoise(i.uv) * 3.14159/3;
                 dir = cos(noiseRadian)*dir + sin(noiseRadian)*float2(dir.y, -dir.x);
-                dir *= lerp(5, 3, weight);
-                norm *= lerp(0.5, 8, weight);
+                dir *= lerp(3, 1.5, weight);
+                norm *= lerp(0.1, 0.5, weight);
 
                 float3 color = 0;
                 for(float m=0; m<kernelSampleCount; m++){

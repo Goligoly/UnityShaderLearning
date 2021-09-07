@@ -136,7 +136,6 @@
 
             float4 fragFlow (v2f i) : SV_Target
             {
-                float scale = 0.001;
                 float2 xy = ScreenToMiddle(i.uv);
                 float dist = length(xy);
                 float2 weight = smoothstep(0.8, 1.5, dist);
@@ -155,7 +154,7 @@
                 for(float m=0; m<kernelSampleCount; m++){
                     float3 kern = kernel[m];
                     float2 o = kern.x*dir + kern.y*norm;
-                    color += kern.z * tex2D(_MainTex, MiddleToScreen(xy + o * scale)).rgb;
+                    color += kern.z * tex2D(_MainTex, MiddleToScreen(xy + o * _MainTex_TexelSize.y)).rgb;
                 }
                 return float4(color, 1) * lerp(float4(1,1,1,1), float4(0.97, 0.95, 0.96, 1), smoothstep(1, 2, dist)) ;
             }

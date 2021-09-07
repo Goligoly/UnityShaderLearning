@@ -133,14 +133,8 @@
                 return o;
             }
 
-            float3 ACESToneMapping(float3 originColor)
-            {
-                return (originColor * (2.51 * originColor + 0.03)) / (originColor * (2.43 * originColor + 0.59) + 0.14);
-            }
-
             fixed4 fragBloom(v2f i) : SV_Target {
                 float3 color = tex2D(_MainTex, i.uv) + tex2D(_Bloom, i.uv);
-                color = ACESToneMapping(color);
                 return float4(color, 1);
             }
 

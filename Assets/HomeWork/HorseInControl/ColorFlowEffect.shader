@@ -90,7 +90,7 @@
                 float count = 5;
                 float a = ceil(dot(normalize(xy), float2(-sin(_Time.x), cos(_Time.x))) * count)/count;
                 float b = ceil(dot(normalize(xy), float2(-cos(_Time.x), sin(_Time.x))) * count)/count;
-                float bias = getRandom(float2(a, b)) * 0.8 - sin(_Time.y) * 0.2 - 0.2;
+                float bias = getRandom(float2(a, b)) * 0.6 + sin(_Time.y) * 0.2 + 0.2;
 
                 float sample0 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[0]));
                 float sample1 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[1]));
@@ -103,7 +103,7 @@
                 edge *= CheckSame(sample3, sample4);
 
                 float isObject = sample0 < 1;
-                float3 color = lerp(tex2D(_MainTex, i.uv[0]).rgb, float3(0, 0, 0), edge) * bias * isObject;
+                float3 color = lerp(tex2D(_MainTex, i.uv[0]).rgb, float3(0, 0, 0), edge) * smoothstep(0.4, 0.9, bias) * isObject;
                 return float4(color, isObject);
             }
             ENDCG

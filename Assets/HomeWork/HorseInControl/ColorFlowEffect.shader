@@ -33,17 +33,20 @@
             return o;
         }
 
+        //屏幕坐标转换为物体为中心的屏幕坐标
         float2 ScreenToMiddle(float2 uv)
         {
             uv = uv - _TargetPosition.xy;
             return (uv * 2 - 1) * _ScreenParams.xy / _ScreenParams.y;
         }
 
+        //物体为中心的屏幕坐标转换为屏幕坐标
         float2 MiddleToScreen(float2 xy)
         {
             return (xy * _ScreenParams.y / _ScreenParams.xy) * 0.5 + 0.5 + _TargetPosition.xy;
         }
 
+        //二维随机数生成器
         float getRandom(float2 xy)
         {
             return frac(sin(dot(xy, float2(12.9898, 78.233))) * 43758.5453);
@@ -86,12 +89,14 @@
 
             float4 fragEdge (v2fEdge i) : SV_Target
             {
+                //按角度取随机值
                 float2 xy = ScreenToMiddle(i.uv[0]);
                 float count = 5;
                 float a = ceil(dot(normalize(xy), float2(-sin(_Time.x), cos(_Time.x))) * count)/count;
                 float b = ceil(dot(normalize(xy), float2(-cos(_Time.x), sin(_Time.x))) * count)/count;
                 float bias = getRandom(float2(a, b)) * 0.6 + sin(_Time.y) * 0.2 + 0.2;
 
+                //边缘检测
                 float sample0 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[0]));
                 float sample1 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[1]));
                 float sample2 = Linear01Depth(SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv[2]));
@@ -103,7 +108,7 @@
                 edge *= CheckSame(sample3, sample4);
 
                 float isObject = sample0 < 1;
-                float3 color = lerp(tex2D(_MainTex, i.uv[0]).rgb, float3(0, 0, 0), edge) * smoothstep(0.4, 0.9, bias) * isObject;
+                float3 color = lerp(tex2D(_MainTex, i.uv[0]).rgb, float3(0, 0, 0), edge) * smoothstep(0.2, 1, bias) * isObject;
                 return float4(color, isObject);
             }
             ENDCG
@@ -115,6 +120,7 @@
             #pragma vertex vert
             #pragma fragment fragFlow
 
+            //卷积核
             static const int kernelSampleCount = 9;
             static const float3 kernel[kernelSampleCount] = {
                 float3(1, 0, 0.3),
@@ -128,6 +134,7 @@
                 float3(3, -1, 0.05)
             };
 
+            //流体扰动噪声图采样
             float getFlowNoise(float2 uv)
             {
                 uv += _Time.y * float2(0.05, 0.02);
@@ -138,25 +145,32 @@
             {
                 float2 xy = ScreenToMiddle(i.uv);
                 float dist = length(xy);
-                float2 weight = smoothstep(0.8, 1.5, dist);
+                float2 weight = smoothstep(0.2, 0.6, dist);
+
+                //计算流动方向
                 float2 dir = _Direction.xy;
                 float2 norm = float2(_Direction.y, -_Direction.x);
                 if(abs(_Direction.x) < 0.01 && abs(_Direction.y) < 0.01){
                     dir = -xy/dist;
                     norm = -float2(xy.y, -xy.x)/dist;
                 }
+
+                //流动扰动
                 float noiseRadian = getFlowNoise(i.uv) * 3.14159/3;
                 dir = cos(noiseRadian)*dir + sin(noiseRadian)*float2(dir.y, -dir.x);
-                dir *= lerp(3, 1.5, weight);
-                norm *= lerp(0.1, 0.5, weight);
+                
+                //根据距离权重变换卷积核的尺寸控制流速和扩散
+                dir *= lerp(2, 1, weight);
+                norm *= lerp(0.1, 1, weight);
 
+                //卷积核采样
                 float3 color = 0;
                 for(float m=0; m<kernelSampleCount; m++){
                     float3 kern = kernel[m];
                     float2 o = kern.x*dir + kern.y*norm;
                     color += kern.z * tex2D(_MainTex, MiddleToScreen(xy + o * _MainTex_TexelSize.y)).rgb;
                 }
-                return float4(color, 1) * lerp(float4(1,1,1,1), float4(0.97, 0.95, 0.96, 1), smoothstep(1, 2, dist)) ;
+                return float4(color, 1) * lerp(float4(1,1,1,1), float4(0.97, 0.85, 0.93, 1), smoothstep(0.8, 1, dist)) ;
             }
             ENDCG
         }

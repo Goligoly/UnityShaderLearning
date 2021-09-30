@@ -9,7 +9,7 @@
 		
         #include "UnityCG.cginc"
     
-        sampler2D _MainTex;
+        sampler2D _MainTex, _ToneMap;
         float4 _MainTex_TexelSize;
 
         float _XRange;
@@ -57,9 +57,20 @@
                 return (originColor * (2.51 * originColor + 0.03)) / (originColor * (2.43 * originColor + 0.59) + 0.14);
             }
 
+			float texToneMap(float c)
+            {
+                return tex2D(_ToneMap, float2(c, 0));
+            }
+
+			float3 customToneMapping(float3 originColor)
+            {
+                float3 color = originColor / (originColor + 1);
+                return float3(texToneMap(color.r),texToneMap(color.g),texToneMap(color.b));
+            }
+
             float4 frag(v2f i) : SV_Target {
                 float4 sample = tex2D(_MainTex, i.uv);
-                float3 color  = i.uv.x < _XRange ? sample : ACESToneMapping(sample.rgb);
+                float3 color  = customToneMapping(sample.rgb);
                 return float4(color, 1);
             }
 			ENDCG  

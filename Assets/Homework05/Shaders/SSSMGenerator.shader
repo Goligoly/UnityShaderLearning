@@ -74,7 +74,7 @@
                     for(float y = -_PCF_Range; y <= _PCF_Range; y++)
                     {
                         samplerValue = tex2D(_CustomShadowMap0, uv + float2(x, y) * _CustomShadowMap0_TexelSize).r;
-                        shadowValue += samplerValue < depth ? 0 : 1;;
+                        shadowValue += samplerValue + 0.01 < depth ? 0 : 1;
                     }
                 }
                 return shadowValue / ((2 * _PCF_Range + 1) * (2 * _PCF_Range + 1));

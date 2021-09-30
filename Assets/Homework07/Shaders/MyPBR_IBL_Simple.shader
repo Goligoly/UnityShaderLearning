@@ -2,7 +2,7 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _Albedo ("Albedo", color) = (1,1,1,1)
         _Roughness ("Roughness", Range(0, 1)) = 0.5
         _Metallic ("Metallic", Range(0, 1)) = 0.5
     }
@@ -37,7 +37,7 @@
             };
 
             sampler2D _MainTex;
-            float4 _MainTex_ST;
+            float4 _MainTex_ST, _Albedo;
             float _Roughness, _Metallic;
 
             v2f vert(appdata_tan v)
@@ -55,7 +55,7 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                float3 albedo = tex2D(_MainTex, i.uv);
+                float3 albedo = _Albedo;
                 float roughness = lerp(0.002, 0.99, _Roughness);
                 float metallicness = _Metallic;
 

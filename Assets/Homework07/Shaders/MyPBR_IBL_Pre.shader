@@ -2,7 +2,7 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        _Albedo ("Albedo", color) = (1,1,1,1)
         _Roughness ("Roughness", Range(0, 1)) = 0.5
         _Metallic ("Metallic", Range(0, 1)) = 0.5
         [NoScaleOffset] _LUT ("BRDF pre texture", 2D) = "white" {}
@@ -38,7 +38,7 @@
             };
 
             sampler2D _MainTex, _IndirectIrradianceMap, _PreFilterEnvMap, _LUT;
-            float4 _MainTex_ST;
+            float4 _MainTex_ST, _Albedo;
             float _Roughness, _Metallic;
 
             v2f vert(appdata_tan v)
@@ -56,7 +56,7 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                float3 albedo = tex2D(_MainTex, i.uv);
+                float3 albedo = _Albedo;
                 float roughness = lerp(0.002, 0.99, _Roughness);
                 float metallicness = _Metallic;
 
@@ -97,7 +97,7 @@
                 float3 indSpecRadiance = tex2Dlod(_PreFilterEnvMap, uv);
 
                 float2 envBRDF = tex2D(_LUT, float2(dots.ndotv, roughness));
-                float3 indirectSpecular = indSpecRadiance * (fresnel_term * envBRDF.r + envBRDF.g);
+                float3 indirectSpecular = indSpecRadiance * (F0 * envBRDF.r + envBRDF.g);
 
                 float3 indirectResult = kd * indirectDiffuse + indirectSpecular;
                 float3 result = directResult + indirectResult;

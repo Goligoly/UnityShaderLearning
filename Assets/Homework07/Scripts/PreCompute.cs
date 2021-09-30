@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PreCompute : MonoBehaviour
 {
+    public Color albedo;
     [Range(0, 1)] public float roughness;
     [Range(0, 1)] public float metallic;
     public Shader preComputeShader;
@@ -37,16 +38,24 @@ public class PreCompute : MonoBehaviour
 
     void Update()
     {
-        matDirect.SetFloat("_Roughness", roughness);
-        matMonte.SetFloat("_Roughness", roughness);
-        matPre.SetFloat("_Roughness", roughness);
-        matSimple.SetFloat("_Roughness", roughness);
+        matDirect.SetColor("_Albedo", albedo);
+        matMonte.SetColor("_Albedo", albedo);
+        matPre.SetColor("_Albedo", albedo);
+        matSimple.SetColor("_Albedo", albedo);
+        matUnity.SetColor("_Color", albedo);
+        
+        float tempRough = Mathf.Pow(roughness, 2.2f);
+        matDirect.SetFloat("_Roughness", tempRough);
+        matMonte.SetFloat("_Roughness", tempRough);
+        matPre.SetFloat("_Roughness", tempRough);
+        matSimple.SetFloat("_Roughness", tempRough);
         matUnity.SetFloat("_Glossiness", 1 - roughness);
         
-        matDirect.SetFloat("_Metallic", metallic);
-        matMonte.SetFloat("_Metallic", metallic);
-        matPre.SetFloat("_Metallic", metallic);
-        matSimple.SetFloat("_Metallic", metallic);
+        float tempMetal = Mathf.Pow(metallic, 2.2f);
+        matDirect.SetFloat("_Metallic", tempMetal);
+        matMonte.SetFloat("_Metallic", tempMetal);
+        matPre.SetFloat("_Metallic", tempMetal);
+        matSimple.SetFloat("_Metallic", tempMetal);
         matUnity.SetFloat("_Metallic", metallic);
     }
 

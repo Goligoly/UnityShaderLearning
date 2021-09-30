@@ -2,10 +2,11 @@
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
+        //_MainTex ("Texture", 2D) = "white" {}
         //[NoScaleOffset] _NormalMap ("Normal Map", 2D) = "white" {}
         //[NoScaleOffset] _MetalMap ("Metal Map", 2D) = "white" {}
         //[NoScaleOffset] _RoughMap ("Rough Map", 2D) = "white" {}
+        _Albedo ("Albedo", color) = (1,1,1,1)
         _Roughness ("Roughness", Range(0, 1)) = 0.5
         _Metallic ("Metallic", Range(0, 1)) = 0.5
     }
@@ -42,7 +43,7 @@
             };
 
             sampler2D _MainTex, _NormalMap, _MetalMap, _RoughMap;
-            float4 _MainTex_ST;
+            float4 _MainTex_ST, _Albedo;
             float _Roughness, _Metallic;
 
             v2f vert(appdata_tan v)
@@ -74,7 +75,7 @@
                 //float roughness = tex2D(_RoughMap, i.uv);
                 //float metallicness = tex2D(_MetalMap, i.uv);
 
-                float3 albedo = tex2D(_MainTex, i.uv);
+                float3 albedo = _Albedo;
                 float roughness = lerp(0.002, 1, _Roughness);
                 float metallicness = _Metallic;
 

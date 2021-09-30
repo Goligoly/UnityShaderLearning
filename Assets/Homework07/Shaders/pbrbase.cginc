@@ -45,6 +45,11 @@
         return F0 + (1 - F0) * pow((1 - cosTheta), 5);
     }
 
+    float3 fresnelRoughness(float cosTheta, float3 F0, float roughness)
+    {
+        return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    }
+
     float3x3 genTrans(float3 zDir)
     {
         float3 zz = zDir;
@@ -68,7 +73,7 @@
         return float2(float(i) / float(n), radicalInverse(i));
     }
 
-    //hemisphereCos的pdf为 1 / (2 * pi)
+    //hemisphereUniform的pdf为 1 / (2 * pi)
     float3 hemisphereUniform(float2 uv)
     {
         float phi = uv.y * UNITY_TWO_PI;
@@ -108,12 +113,12 @@
     float3 uniformSampler(float3 zDir)
     {
         float3 color = 0;
-        int num = 1024;
+        int num = 4096;
         float3x3 localCord = genTrans(zDir);
         for (int i = 0; i < num; i++)
         {
             float2 hammersley = hammersleySample(i, num);
-            float3 sample = hemisphereCos(hammersley);
+            float3 sample = hemisphereUniform(hammersley);
             sample = mul(localCord, sample);
             color += UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, sample) * dot(sample, zDir);
         }

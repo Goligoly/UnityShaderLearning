@@ -95,18 +95,18 @@
                 for (int ii = 0; ii < num; ii++)
                 {
                     float2 hammersley = hammersleySample(ii, num);
-                    float3 sample = hemisphereCos(hammersley);
-                    sample = mul(localCord, sample);
-                    float3 radiance = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, sample);
+                    float4 sample = importanceSampleGGX(hammersley, roughness);
+                    sample.xyz = mul(localCord, sample.xyz);
+                    sample.xyz = reflect(-worldView, sample.xyz);
+                    float3 radiance = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, sample.xyz);
 
-                    dotData localDots = calDots(sample, worldView, worldNormal);
+                    dotData localDots = calDots(sample.xyz, worldView, worldNormal);
                     float localD = distributionFunc(localDots.ndoth, roughness);
                     float localG = geometryFunc(localDots.ndotv, localDots.ndotl, roughness * roughness * 0.5);
                     float3 localF = fresnelFunc(localDots.hdotl, F0);
 
-                    float3 localBRDF = localD * localG * localF * 0.25 / (localDots.ndotv * localDots.ndotl);
-                    //hemisphereCos的pdf为 costheta/pi
-                    indirectSpecular += localBRDF * radiance * UNITY_PI;
+                    float3 local_spec = localD * localG * localF * 0.25 / (localDots.ndotv * localDots.ndotl);
+                    indirectSpecular += max(local_spec * radiance * localDots.ndotl, 0) / sample.w;
                 }
                 indirectSpecular = indirectSpecular / num;
 

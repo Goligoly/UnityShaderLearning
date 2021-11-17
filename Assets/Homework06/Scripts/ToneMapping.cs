@@ -20,7 +20,7 @@ public class ToneMapping : PostEffectBase
 
     private void Start()
     {
-        toneMap = new Texture2D(100, 1,TextureFormat.R8,false);
+        toneMap = new Texture2D(128, 1,TextureFormat.R8,false);
         toneMap.wrapMode = TextureWrapMode.Clamp;
         material.SetTexture("_ToneMap", toneMap);
     }
@@ -34,8 +34,8 @@ public class ToneMapping : PostEffectBase
     {
         float val;
         float key = 0;
-        float delta = 1 / 100f;
-        for (int i = 0; i < 100; i++)
+        float delta = 1 / 128f;
+        for (int i = 0; i < 128; i++)
         {
             val = curve.Evaluate(key);
             toneMap.SetPixel(i,0,new Color(val,0,0));

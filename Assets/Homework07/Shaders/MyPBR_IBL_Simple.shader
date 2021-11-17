@@ -86,8 +86,7 @@
                 //indirect
                 //diffuse
                 float3 ambientContrib = ShadeSH9(float4(worldNormal, 1));
-                float3 ambient = 0.03 * albedo;
-                float3 indirectDiffuse = max(float3(0, 0, 0), ambient + ambientContrib) * albedo;
+                float3 indirectDiffuse = ambientContrib * albedo;
 
                 //specular
                 float3 reflectDir = reflect(-worldView, worldNormal);

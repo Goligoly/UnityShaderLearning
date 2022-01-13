@@ -11,3 +11,5 @@ Temp/
 *.cache
 .vs/
 *.csproj
+.idea/
+obj/

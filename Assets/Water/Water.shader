@@ -9,6 +9,9 @@
         _tranDepth("Transition Depth", Range(0,1)) = 0.5
         _tranFactor("Transition Factor", Range(0,2)) = 0.5
         _refractFactor("Refraction Factor", Range(0,1)) = 0.5
+        _WaveLength("Wave Length", float) = 1
+        _WaveDirection("Wave Direction", Range(0,1)) = 0.5
+        _Steepness("Steepness", Range(0,1)) = 0.5
     }
     SubShader
     {
@@ -51,13 +54,29 @@
 
             sampler2D _MainTex, _NormalTex, _CameraDepthTexture;
             float4 _MainTex_ST, _ShallowCol, _DeepCol;
-            float _tranDepth, _tranFactor, _refractFactor;
+            float _tranDepth, _tranFactor, _refractFactor, _WaveLength, _WaveDirection, _Steepness;
+
+            float3 GerstnerWave(float3 pos)
+            {
+                float3 p = pos;
+                float rad = UNITY_TWO_PI * _WaveDirection;
+                float2 dir = float2(cos(rad), sin(rad));
+                float k = UNITY_TWO_PI / _WaveLength;
+                float c = sqrt(9.8 / k);
+                float f = k * (dot(dir, pos.xz) - c * _Time.y);
+                float a = _Steepness / k;
+                p.x += dir.y * a * cos(f);
+                p.y += a * sin(f);
+                p.z += dir.x * a * cos(f);
+                return p;
+            }
 
             v2f vert(appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+                worldPos = GerstnerWave(worldPos);
+                o.vertex = UnityWorldToClipPos(worldPos);
                 o.uv.xy = TRANSFORM_TEX(v.uv, _MainTex) + float2(sin(_Time.x + worldPos.z), _Time.x);
                 o.uv.zw = TRANSFORM_TEX(v.uv, _MainTex) + float2(_Time.x, 2 * _Time.x);
                 o.screenPos = ComputeScreenPos(o.vertex);

@@ -7,3 +7,5 @@ git tag %ToolVersion% %ToolName%
 
 git push origin %ToolName% %ToolVersion%
 git push origin %ToolName%
+
+pause

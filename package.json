@@ -3,8 +3,5 @@
   "distplayName": "Package Test Gly",
   "description": "Package Test for learning how to set up a custom package",
   "version": "0.0.1",
-  "unity": "2019.4",
-  "dependencies": {
-    "com.packagetest.glylearning": "https://github.com/Goligoly/UnityShaderLearning.git?path=/Assets/testpackage"
-  }
+  "unity": "2019.4"
 }
